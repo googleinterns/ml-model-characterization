@@ -1,5 +1,4 @@
 # Node module to store operator attributes
-
 class Node:
     def __init__(self, label, value = None):
         self.label = label

@@ -1,51 +1,50 @@
-# Module to convert an Operator to Node
-# Extracts attributes from operator and populates Node attributes
-
 import tflite
 from tflite import *
 import inspect
 import Node
 
+# Module to convert an Operator to Node
+# Extracts attributes from operator and populates Node attributes
 class OpToNode:
 
     def __init__(self):
 
         # Dictionaries for enum value to enum name mapping
-        class_type = tflite.Padding.Padding
+        class_type = Padding.Padding
         self._padding = dict()
         self._fill_dict(class_type, self._padding)
 
 
-        class_type = tflite.ActivationFunctionType.ActivationFunctionType
+        class_type = ActivationFunctionType.ActivationFunctionType
         self._activation_function_type = dict()
         self._fill_dict(class_type, self._activation_function_type)
 
 
-        class_type = tflite.LSHProjectionType.LSHProjectionType
+        class_type = LSHProjectionType.LSHProjectionType
         self._lsh_projection_type = dict()
         self._fill_dict(class_type, self._lsh_projection_type)
         
 
-        class_type = tflite.FullyConnectedOptionsWeightsFormat.FullyConnectedOptionsWeightsFormat
+        class_type = FullyConnectedOptionsWeightsFormat.FullyConnectedOptionsWeightsFormat
         self._weights_format = dict()
         self._fill_dict(class_type, self._weights_format)
 
 
-        class_type = tflite.LSTMKernelType.LSTMKernelType
+        class_type = LSTMKernelType.LSTMKernelType
         self._lstm_kernel_type = dict()
         self._fill_dict(class_type, self._lstm_kernel_type)
 
 
-        class_type = tflite.CombinerType.CombinerType
+        class_type = CombinerType.CombinerType
         self._combiner_type = dict()
         self._fill_dict(class_type, self._combiner_type)
 
-        class_type = tflite.TensorType.TensorType
+        class_type = TensorType.TensorType
         self._tensor_type = dict()
         self._fill_dict(class_type, self._tensor_type)
 
 
-        class_type = tflite.MirrorPadMode.MirrorPadMode
+        class_type = MirrorPadMode.MirrorPadMode
         self._mirror_pad_mode = dict()
         self._fill_dict(class_type, self._mirror_pad_mode)
 
@@ -58,13 +57,13 @@ class OpToNode:
                     val_to_name[member[1]] = member[0]
 
     # Internal methods to cast BuiltinOptions at runtime and extract options,
-    # dummy methods exist for Options with no attributes for future improvements.
+    # Dummy methods exist for Options with no attributes for future improvements.
     def _none_options(self, operator, node):
         return node
         
     def _conv2d_options(self, operator, node):
         # Casting into required Class
-        options = tflite.Conv2DOptions.Conv2DOptions() 
+        options = Conv2DOptions.Conv2DOptions() 
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos) 
@@ -83,7 +82,7 @@ class OpToNode:
         return node
     
     def _depthwise_conv2d_options(self, operator, node):
-        options = tflite.DepthwiseConv2DOptions.DepthwiseConv2DOptions()
+        options = DepthwiseConv2DOptions.DepthwiseConv2DOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos) 
@@ -102,7 +101,7 @@ class OpToNode:
         return node
     
     def _concat_embeddding_options(self, operator, node):
-        options = tflite.ConcatEmbeddingsOptions.ConcatEmbeddingsOptions()
+        options = ConcatEmbeddingsOptions.ConcatEmbeddingsOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos) 
@@ -112,7 +111,7 @@ class OpToNode:
         return node
     
     def _lsh_projection_options(self, operator, node):
-        options = tflite.LSHProjectionOptions.LSHProjectionOptions()
+        options = LSHProjectionOptions.LSHProjectionOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos) 
@@ -122,7 +121,7 @@ class OpToNode:
         return node
     
     def _pool2d_options(self, operator, node):
-        options = tflite.Pool2DOptions.Pool2DOptions()
+        options = Pool2DOptions.Pool2DOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -140,7 +139,7 @@ class OpToNode:
         return node
     
     def _svdf_options(self, operator, node):
-        options = tflite.SVDFOptions.SVDFOptions()
+        options = SVDFOptions.SVDFOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -155,7 +154,7 @@ class OpToNode:
         return node
 
     def _rnn_options(self, operator, node):
-        options = tflite.RNNOptions.RNNOptions()
+        options = RNNOptions.RNNOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -169,7 +168,7 @@ class OpToNode:
         return node
     
     def _fully_connected_options(self, operator, node):
-        options = tflite.FullyConnectedOptions.FullyConnectedOptions()
+        options = FullyConnectedOptions.FullyConnectedOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -188,7 +187,7 @@ class OpToNode:
         return node
 
     def _concatenation_options(self, operator, node):
-        options = tflite.ConcatenationOptions.ConcatenationOptions()
+        options = ConcatenationOptions.ConcatenationOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -202,7 +201,7 @@ class OpToNode:
         return node
             
     def _add_options(self, operator, node):
-        options = tflite.AddOptions.AddOptions()
+        options = AddOptions.AddOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -215,7 +214,7 @@ class OpToNode:
         return node
     
     def _l2norm_options(self, operator, node):
-        options = tflite.L2NormOptions.L2NormOptions()
+        options = L2NormOptions.L2NormOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -231,7 +230,7 @@ class OpToNode:
         return node
     
     def _lstm_options(self, operator, node):
-        options = tflite.LSTMOptions.LSTMOptions()
+        options = LSTMOptions.LSTMOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -255,7 +254,7 @@ class OpToNode:
         return node
 
     def _skipgram_options(self, operator, node):
-        options = tflite.SkipGramOptions.SkipGramOptions()
+        options = SkipGramOptions.SkipGramOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -270,7 +269,7 @@ class OpToNode:
         return node
         
     def _embedding_lookup_sparse_options(self, operator, node):
-        options = tflite.EmbeddingLookupSparseOptions.EmbeddingLookupSparseOptions()
+        options = EmbeddingLookupSparseOptions.EmbeddingLookupSparseOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -280,7 +279,7 @@ class OpToNode:
         return node
     
     def _mul_options(self, operator, node):
-        options = tflite.MulOptions.MulOptions()
+        options = MulOptions.MulOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -296,7 +295,7 @@ class OpToNode:
         return node
     
     def _gather_options(self, operator, node):
-        options = tflite.GatherOptions.GatherOptions()
+        options = GatherOptions.GatherOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -315,7 +314,7 @@ class OpToNode:
         return node
     
     def _reducer_options(self, operator, node):
-        options = tflite.ReducerOptions.ReducerOptions()
+        options = ReducerOptions.ReducerOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -325,7 +324,7 @@ class OpToNode:
         return node
     
     def _sub_options(self, operator, node):
-        options = tflite.SubOptions.SubOptions()
+        options = SubOptions.SubOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -338,7 +337,7 @@ class OpToNode:
         return node
     
     def _div_options(self, operator, node):
-        options = tflite.DivOptions.DivOptions()
+        options = DivOptions.DivOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -354,7 +353,7 @@ class OpToNode:
         return node
     
     def _sequence_rnn_options(self, operator, node):
-        options = tflite.SequenceRNNOptions.SequenceRNNOptions()
+        options = SequenceRNNOptions.SequenceRNNOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -377,7 +376,7 @@ class OpToNode:
         return node
     
     def _split_options(self, operator, node):
-        options = tflite.SplitOptions.SplitOptions()
+        options = SplitOptions.SplitOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -390,7 +389,7 @@ class OpToNode:
         return node
     
     def _cast_options(self, operator, node):
-        options = tflite.CastOptions.CastOptions()
+        options = CastOptions.CastOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -434,7 +433,7 @@ class OpToNode:
         return node
     
     def _transpose_conv_options(self, operator, node):
-        options = tflite.TransposeConvOptions.TransposeConvOptions()
+        options = TransposeConvOptions.TransposeConvOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -470,7 +469,7 @@ class OpToNode:
         return node
     
     def _fake_quant_options(self, operator, node):
-        options = tflite.FakeQuantOptions.FakeQuantOptions()
+        options = FakeQuantOptions.FakeQuantOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -481,7 +480,7 @@ class OpToNode:
         return node
     
     def _pack_options(self, operator, node):
-        options = tflite.PackOptions.PackOptions()
+        options = PackOptions.PackOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -494,7 +493,7 @@ class OpToNode:
         return node
     
     def _onehot_options(self, operator, node):
-        options = tflite.OneHotOptions.OneHotOptions()
+        options = OneHotOptions.OneHotOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -510,7 +509,7 @@ class OpToNode:
         return node
     
     def _unpack_options(self, operator, node):
-        options = tflite.UnpackOptions.UnpackOptions()
+        options = UnpackOptions.UnpackOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -532,7 +531,7 @@ class OpToNode:
         return node
     
     def _bidirectional_sequence_lstm_options(self, operator, node):
-        options = tflite.BidirectionalSequenceLSTMOptions.BidirectionalSequenceLSTMOptions()
+        options = BidirectionalSequenceLSTMOptions.BidirectionalSequenceLSTMOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -547,7 +546,7 @@ class OpToNode:
         return node
     
     def _bidirectional_sequence_rnn_options(self, operator, node):
-        options = tflite.BidirectionalSequenceRNNOptions.BidirectionalSequenceRNNOptions()
+        options = BidirectionalSequenceRNNOptions.BidirectionalSequenceRNNOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -562,7 +561,7 @@ class OpToNode:
         return node
     
     def _unidirectional_sequence_lstm_options(self, operator, node):
-        options = tflite.UnidirectionalSequenceLSTMOptions.UnidirectionalSequenceLSTMOptions()
+        options = UnidirectionalSequenceLSTMOptions.UnidirectionalSequenceLSTMOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -591,7 +590,7 @@ class OpToNode:
         return node
     
     def _mirror_pad_options(self, operator, node):
-        options = tflite.MirrorPadOptions.MirrorPadOptions()
+        options = MirrorPadOptions.MirrorPadOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
@@ -604,7 +603,7 @@ class OpToNode:
         return node
     
     def _splitv_options(self, operator, node):
-        options = tflite.SplitVOptions.SplitVOptions()
+        options = SplitVOptions.SplitVOptions()
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)

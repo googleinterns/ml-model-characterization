@@ -1,4 +1,6 @@
-# Builds main, which parses a tflite file into a graph and prints it
+# Builds main and init
+# init compiles schema.fbs with flatc to generate python code files
+# main parses a tflite file into a graph and prints it
 
 py_library(
     name = 'Node',

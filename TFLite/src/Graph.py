@@ -1,9 +1,11 @@
-# Graph Module to store adjacency list and graph related attributed
-# Nodes will be a list of operators, edges a list of tensors
-# adj_list, start_nodes will be in the form of indices referencing nodes and edges
 
 from queue import Queue
 
+# Graph Module to store adjacency list and graph related attributed
+# Nodes will be a list of operators, edges a list of tensors
+# start_nodes is a list of indices referencing nodes and edges, denoting entry nodes
+# adj_list is a dictionary of the form {src node : list of ([edge, dest_node])} 
+# where src_node, edge and dest_node and indices referencing nodes and edges
 class Graph:
     def __init__(self, nodes, start_node_indices, edges, adj_list):
         self.nodes = nodes
@@ -18,6 +20,7 @@ class Graph:
     def calc_num_outputs(self):
         ret = 0
 
+        # Number of proxy nodes for output
         for node in self.nodes:
             if node.label == 'Output_Placeholder':
                 ret += 1
@@ -34,14 +37,14 @@ class Graph:
         return ret
 
     def calc_max_fanin(self):
-        in_count = [0] * len(self.nodes)
+        in_degree = [0] * len(self.nodes)
         ret = 0
 
         for src_node_index in range(len(self.nodes)):
             if src_node_index in self.adj_list:
                 for (_, dest_node_index) in self.adj_list[src_node_index]:
-                    in_count[dest_node_index] += 1
-                    ret = max(ret, in_count[dest_node_index])
+                    in_degree[dest_node_index] += 1
+                    ret = max(ret, in_degree[dest_node_index])
  
         return ret    
 
@@ -50,13 +53,15 @@ class Graph:
         visited = dict()
         queue = Queue()
         
+        # List to store visit status of a node
         for node_index in range(len(self.nodes)):
             visited[node_index] = False
 
+        # For each start node, if not already visited, start a new traversal
         for node_index in self.start_node_indices:
-            print('\nStart of new subgraph\n')
             queue.put(node_index)
             
+            # BFS
             while not queue.empty():
                 source_node_index = queue.get()
 

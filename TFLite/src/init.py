@@ -1,5 +1,6 @@
 import os
 
+#function to compile schema.fbs with flatc and generate code files
 def init_tflite_files():
 
     # Absolute path to schema.fbs and the path to store the generated code
@@ -13,13 +14,15 @@ def init_tflite_files():
 
     #Echoing code to __init__.py for corect funtioning of 'from tflite import *'
     os.system(
-        'echo "import os.path\n'
-        'import glob\n'
-        'modules = glob.glob(os.path.join(os.path.dirname(__file__), "*.py"))\n'
-        '__all__ = list()\n'
+        'echo "from os import path\n'
+        'import glob\n\n'
+        'modules = glob.glob(path.join(path.dirname(__file__), \'*.py\'))\n'
+        'str_modules = str()\n'
         'for module in modules:\n'
-        '   if isfile(module) and not module.endswith(\'__init__.py\'):\n'
-        '       __all__.append(basename(module)[:-3]\n"'
+        '   if path.isfile(module) and not module.endswith(\'__init__.py\'):\n'
+        '       str_modules += path.basename(module)[:-3] + \' \'\n\n'
+        'str_modules = str_modules[:-1]\n'
+        '__all__ = str_modules.split(\' \')\n" '
         '> ' + out_path + 'tflite/__init__.py'
     )
 

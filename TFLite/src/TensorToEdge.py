@@ -1,15 +1,14 @@
-#Module to convert Tensor to Edge
-
 import Edge
-import tflite.TensorType
+from tflite import TensorType
 import inspect
 
+#Module to convert Tensor to Edge
 class TensorToEdge:
     
     def __init__(self):
 
         # Dictionary to map enum value to enum name
-        typeclass = tflite.TensorType.TensorType
+        typeclass = TensorType.TensorType
         self._tensor_type = dict()
         for member in inspect.getmembers(typeclass):
             if not member[0].startswith('_'):
@@ -18,6 +17,7 @@ class TensorToEdge:
 
     def convert(self, tensor):
 
+        # Creating edge and extracting features
         new_edge = Edge.Edge(label = tensor.Name(), value = tensor)
         new_edge.type = self._tensor_type[tensor.Type()]
 
