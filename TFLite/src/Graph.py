@@ -1,3 +1,7 @@
+# Graph Module to store adjacency list and graph related attributed
+# Nodes will be a list of operators, edges a list of tensors
+# adj_list, start_nodes will be in the form of indices referencing nodes and edges
+
 from queue import Queue
 
 class Graph:
@@ -72,6 +76,7 @@ class Graph:
 
     # Print nodes with attributes
     def print_nodes(self):
+        print("\nOperators\n")
         for node in self.nodes:
             attrs = vars(node)
             
@@ -79,10 +84,11 @@ class Graph:
                 if item[1] != None and item[1] != "NONE":
                     print(str(item[0]) + ": " + str(item[1]), end=' ')
             
-            print("\n")
+            print()
 
     # Print edges with attributes
     def print_edges(self):
+        print("\nTensors\n")
         for edge in self.edges:
             attrs = vars(edge)
             
@@ -90,5 +96,5 @@ class Graph:
                 if item[1] != None and item[1] != "NONE":
                     print(str(item[0]) + ": " + str(item[1]), end=' ')
             
-            print("\n")
+            print()
 

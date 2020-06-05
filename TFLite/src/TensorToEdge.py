@@ -1,7 +1,8 @@
+#Module to convert Tensor to Edge
+
 import Edge
 import tflite.TensorType
 import inspect
-
 
 class TensorToEdge:
     

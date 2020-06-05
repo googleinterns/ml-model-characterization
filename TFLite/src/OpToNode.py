@@ -1,8 +1,10 @@
+# Module to convert an Operator to Node
+# Extracts attributes from operator and populates Node attributes
+
 import tflite
 from tflite import *
 import inspect
 import Node
-
 
 class OpToNode:
 
@@ -61,11 +63,13 @@ class OpToNode:
         return node
         
     def _conv2d_options(self, operator, node):
+        # Casting into required Class
         options = tflite.Conv2DOptions.Conv2DOptions() 
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos) 
         
+        # Extracting attributes
         node.padding = self._padding[options.Padding()] 
         
         val = options.FusedActivationFunction()
