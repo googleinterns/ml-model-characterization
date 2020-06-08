@@ -103,3 +103,36 @@ class Graph:
             
             print()
 
+    # Function to get those edges which are traversed during BFS
+    # Assumption is that the tensors not reached by traversal are weights, bias etc.
+    def get_traversed_edges(self):
+        visited = dict()
+        queue = Queue()
+
+        # set to maintain unique edges encountered
+        traversed_edges = set()
+        
+        # List to store visit status of a node
+        for node_index in range(len(self.nodes)):
+            visited[node_index] = False
+
+        # For each start node, if not already visited, start a new traversal
+        for node_index in self.start_node_indices:
+            queue.put(node_index)
+            
+            # BFS
+            while not queue.empty():
+                source_node_index = queue.get()
+
+                if source_node_index not in self.adj_list:
+                    continue
+
+                for [edge_index, dest_node_index] in self.adj_list[source_node_index]:
+                    traversed_edges.add(self.edges[edge_index])
+
+                    if not visited[dest_node_index]:
+                        visited[dest_node_index] = True
+                        queue.put(dest_node_index)
+        
+        return list(traversed_edges)
+

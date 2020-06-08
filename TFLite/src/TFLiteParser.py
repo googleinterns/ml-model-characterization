@@ -2,9 +2,9 @@ import flatbuffers
 import inspect
 from tflite import BuiltinOperator
 from tflite import Model
-import Node
-import Edge
-import Graph
+from common import Node
+from common import Edge
+from common import Graph
 import OpToNode
 import TensorToEdge
 
@@ -49,7 +49,6 @@ class TFLiteParser:
 
         # Only considering the main model
         subgraph = model.Subgraphs(0)
-        print(subgraph.Name())
 
         # Dictionary to store origin and destination nodes for each edge
         to_nodes = dict()
@@ -86,6 +85,16 @@ class TFLiteParser:
             opname =  self._builtin_optype[builtin_opcode]
 
             new_node = self._OP_TO_NODE.convert(operator, opname)
+
+            # Condition to extract Conv 2D filter sizes and
+            # input and output channels as it is contained in tensors 
+            # and not in operators
+            if new_node.label == "CONV_2D":
+                weight_tensor = subgraph.Tensors(operator.Inputs(1))
+                new_node.output_channels = weight_tensor.Shape(0)
+                new_node.kernel_height = weight_tensor.Shape(1)
+                new_node.kernel_width = weight_tensor.Shape(2)
+                new_node.input_channels = weight_tensor.Shape(3)
 
             nodes.append(new_node)
             node_index = len(nodes) - 1

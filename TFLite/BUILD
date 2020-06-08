@@ -4,17 +4,17 @@
 
 py_library(
     name = 'Node',
-    srcs = ['src/Node.py'],
+    srcs = ['src/common/Node.py'],
 )
 
 py_library(
     name = 'Edge',
-    srcs = ['src/Edge.py'],
+    srcs = ['src/common/Edge.py'],
 )
 
 py_library(
     name = 'Graph',
-    srcs = ['src/Graph.py'],
+    srcs = ['src/common/Graph.py'],
     deps = [':Node', ':Edge'],
 )
 

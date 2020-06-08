@@ -1,4 +1,4 @@
-import Edge
+from common import Edge
 from tflite import TensorType
 import inspect
 
