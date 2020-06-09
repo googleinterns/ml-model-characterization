@@ -23,24 +23,26 @@ class Node:
         self.depth_multiplier = None
         self.num_channels = None
         self.lsh_projection = None
+
+        # Filter size for Pool2D
         self.filter_width = None
         self.filter_height = None
-        self.rank = None
+
         self.asymmetric_quantize_inputs = None
         self.weights_format = None
         self.keep_num_dims = None
         self.axis = None
-        self.kernel_type = None
+        self.lstm_kernel_type = None
         self.ngram_size = None
         self.max_skip_size = None
         self.include_all_ngrams = None
         self.combiner = None
-        self.keep_dims = None
         self.num_splits = None
+
+        # For Cast Operator, input and output tensor types
         self.in_data_type = None
         self.out_data_type = None
-        self.min = None
-        self.max = None
+
         self.merge_outputs = None
         self.mirror_pad_mode = None
 

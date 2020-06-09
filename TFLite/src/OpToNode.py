@@ -146,8 +146,6 @@ class OpToNode:
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
-
-        node.rank = options.Rank()
         
         val = options.FusedActivationFunction()
         node.activation_function = self._activation_function_type[val]
@@ -242,7 +240,7 @@ class OpToNode:
         val = options.FusedActivationFunction()
         node.activation_function = self._activation_function_type[val]
         
-        node.kernel_type = self._lstm_kernel_type[options.KernelType()]
+        node.lstm_kernel_type = self._lstm_kernel_type[options.KernelType()]
         node.asymmetric_quantize_inputs = options.AsymmetricQuantizeInputs()
 
         return node
@@ -321,8 +319,6 @@ class OpToNode:
         buf = operator.BuiltinOptions().Bytes
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos)
-
-        node.keep_dims = options.KeepDims()
 
         return node
     
@@ -471,15 +467,7 @@ class OpToNode:
     def _argmin_options(self, operator, node):
         return node
     
-    def _fake_quant_options(self, operator, node):
-        options = FakeQuantOptions.FakeQuantOptions()
-        buf = operator.BuiltinOptions().Bytes
-        pos = operator.BuiltinOptions().Pos
-        options.Init(buf, pos)
-
-        node.min = options.Min()
-        node.max = options.Max()
-        
+    def _fake_quant_options(self, operator, node):        
         return node
     
     def _pack_options(self, operator, node):
