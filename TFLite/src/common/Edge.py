@@ -3,8 +3,10 @@ class Edge:
     def __init__(self, label, value = None):
         self.label = label
         self.value = value
-        self.shape = None
-        self.type = None
+        
+        self.tensor_label = label
+        self.tensor_shape = None
+        self.tensor_type = None
 
     # helper function to convert all attributes to a string except value and label
     def serialize(self):

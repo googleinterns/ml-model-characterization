@@ -34,7 +34,7 @@ class TFLiteParser:
         return model
 
     # Generate Graph from Model with tensors as edges and operators as nodes
-    def parse_graph(self, file_path):
+    def parse_graph(self, file_path, model_name, category):
         model = self.parse(file_path)
 
         nodes = list()
@@ -138,5 +138,5 @@ class TFLiteParser:
 
                     adj_list[node1_index].append([edge_index, node2_index])
             
-        graph = Graph.Graph(nodes, start_node_indices, edges, adj_list)
+        graph = Graph.Graph(nodes, start_node_indices, edges, adj_list, model_name, category)
         return graph             

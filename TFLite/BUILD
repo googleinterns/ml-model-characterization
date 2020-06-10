@@ -18,6 +18,12 @@ py_library(
     deps = [':Node', ':Edge'],
 )
 
+py_library(
+    name = 'Storage',
+    srcs = ['src/common/Storage.py'],
+    deps = [':Graph']
+)
+
 filegroup(
     name = "tflitefiles",
     srcs = glob(['src/tflite/*.py'])

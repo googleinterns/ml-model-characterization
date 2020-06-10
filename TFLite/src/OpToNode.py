@@ -119,7 +119,7 @@ class OpToNode:
         pos = operator.BuiltinOptions().Pos
         options.Init(buf, pos) 
 
-        node.lsh_projection = self._lsh_projection_type [options.Type()]
+        node.lsh_projection_type = self._lsh_projection_type [options.Type()]
 
         return node
     

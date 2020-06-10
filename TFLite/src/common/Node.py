@@ -5,6 +5,8 @@ class Node:
         self.label = label
         self.value = value
 
+        self.operator_type = label
+
         # Following attributes are extracted from weights of CONV2D
         self.kernel_height = None
         self.kernel_width = None
@@ -22,7 +24,7 @@ class Node:
         self.dilation_w_factor = None
         self.depth_multiplier = None
         self.num_channels = None
-        self.lsh_projection = None
+        self.lsh_projection_type = None
 
         # Filter size for Pool2D
         self.filter_width = None
