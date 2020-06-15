@@ -5,47 +5,6 @@ import argparse
 
 import timeit
 
-# Function to calculate duplication statistics op operators i.e.
-# number of unique tensors and operators accross files in models directory
-def get_duplication():
-    tflite_parser = TFLiteParser.TFLiteParser()
-    node_vis = dict()
-    edge_vis = dict()
-
-    total_nodes = 0
-    duplicated_nodes = 0
-
-    total_edges = 0
-    duplicated_edges = 0
-
-    for file in os.listdir("models/"):
-        graph = tflite_parser.parse_graph("models/" + file, None, None)
-
-        # Calculating number of of total nodes and duplicated nodes in each graph
-        total_nodes += len(graph.nodes)
-        total_edges += len(graph.get_traversed_edges())
-
-        for node in graph.nodes:
-            key = node.serialize()
-
-            if key not in node_vis:
-                node_vis[key] = 1
-            else:
-                duplicated_nodes += 1
-
-        for edge in graph.get_traversed_edges():
-            key = edge.serialize()
-
-            if key not in edge_vis:
-                edge_vis[key] = 1
-            else:
-                duplicated_edges += 1
-
-    print("Duplication stats")
-    print("Total nodes:", total_nodes, "Duplicated nodes:", duplicated_nodes)
-    print("Total traversed edges:", total_edges, "Duplicated traversed edges:", duplicated_edges)
-    print()
-
 # Function to load data in models/filename to spanner DB
 def load_data(filename, model_name, category):
     tflite_parser = TFLiteParser.TFLiteParser()
@@ -82,8 +41,8 @@ if __name__ == "__main__":
     model_name = args.model_name
     category = args.category
 
-    # load_data(filename, model_name, category)
+    load_data(filename, model_name, category)
 
     # get_duplication()
 
-    run_inference(filename, model_name, category)
+    # run_inference(filename, model_name, category)

@@ -53,9 +53,6 @@ class TFLiteParser:
         # Dictionary to store origin and destination nodes for each edge
         to_nodes = dict()
         from_nodes = dict()
-        
-        # Adding tensors to list of edges
-        offset_edges = len(edges) 
 
         for tensor_index in range(subgraph.TensorsLength()):
             tensor = subgraph.Tensors(tensor_index)
@@ -73,7 +70,7 @@ class TFLiteParser:
             
             node_index = len(nodes) - 1
             start_node_indices.append(node_index)
-            edge_index = subgraph.Inputs(input_index) + offset_edges
+            edge_index = subgraph.Inputs(input_index)
             
             if edge_index not in from_nodes:
                 from_nodes.update({edge_index : []})
@@ -91,24 +88,22 @@ class TFLiteParser:
             # and not in operators
             if new_node.label == "CONV_2D":
                 weight_tensor = subgraph.Tensors(operator.Inputs(1))
-                new_node.output_channels = weight_tensor.Shape(0)
-                new_node.kernel_height = weight_tensor.Shape(1)
-                new_node.kernel_width = weight_tensor.Shape(2)
-                new_node.input_channels = weight_tensor.Shape(3)
+                new_node.filter_height = weight_tensor.Shape(1)
+                new_node.filter_width = weight_tensor.Shape(2)
 
             nodes.append(new_node)
             node_index = len(nodes) - 1
 
             
             for input_index in range(operator.InputsLength()):
-                edge_index = operator.Inputs(input_index) + offset_edges
+                edge_index = operator.Inputs(input_index)
                 if edge_index not in to_nodes:
                     to_nodes.update({edge_index : list()})
 
                 to_nodes[edge_index].append(node_index)
             
             for output_index in range(operator.OutputsLength()):
-                edge_index = operator.Outputs(output_index) + offset_edges
+                edge_index = operator.Outputs(output_index)
                 if edge_index not in from_nodes:
                     from_nodes.update({edge_index : list()})
 
@@ -119,14 +114,14 @@ class TFLiteParser:
             nodes.append(new_node)
             
             node_index = len(nodes) - 1
-            edge_index = subgraph.Outputs(output_index) + offset_edges
+            edge_index = subgraph.Outputs(output_index)
             
             if edge_index not in to_nodes:
                 to_nodes.update({edge_index : []})
             to_nodes[edge_index].append(node_index)
 
         # Constructing Adjacency List from to_nodes, from_nodes
-        for edge_index in range(offset_edges, len(edges)):
+        for edge_index in range(len(edges)):
 
             if edge_index not in from_nodes or edge_index not in to_nodes:
                 continue

@@ -5,7 +5,7 @@ from common import Node
 
 # Module to convert an Operator to Node
 # Extracts attributes from operator and populates Node attributes
-# For checking for support on different options, refer to
+# For checking for support on different options and semantic meaning, refer to
 # https://www.tensorflow.org/lite/guide/ops_compatibility#unsupported_operations
 
 class OpToNode:

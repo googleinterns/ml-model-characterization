@@ -11,10 +11,6 @@ CREATE TABLE Operators (
   model_name STRING(1024) NOT NULL,
   operator_id INT64 NOT NULL,
   operator_type STRING(1024),
-  kernel_height INT64,
-  kernel_width INT64,
-  input_channels INT64,
-  output_channels INT64,
   padding STRING(1024),
   activation_function STRING(1024),
   stride_h INT64,
@@ -40,6 +36,11 @@ CREATE TABLE Operators (
   out_data_type STRING(1024),
   merge_outputs BOOL,
   mirror_pad_mode STRING(2024),
+  is_training BOOL,
+  rnn_mode STRING(1024),
+  input_mode STRING(1024),
+  direction STRING(1024),
+  data_format STRING(1024),
 ) PRIMARY KEY(model_name, operator_id),
   INTERLEAVE IN PARENT Models ON DELETE CASCADE;
 
