@@ -1,5 +1,6 @@
 .vscode
 */*/__pycache__
 */*/*/__pycache__
-*/bazel-*
+bazel-*
 TFLite/src/tflite
+*/__pycache__

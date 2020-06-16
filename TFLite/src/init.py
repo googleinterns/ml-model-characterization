@@ -24,7 +24,7 @@ def init_tflite_files(schema_path, out_path):
 if __name__ == "__main__":
 
     # Path to schema and path where the directory should be generated
-    schema_path = "./schema.fbs"
-    out_path = "./src/"
+    schema_path = "./TFLite/schema.fbs"
+    out_path = "./TFLite/src/"
 
     init_tflite_files(schema_path, out_path)

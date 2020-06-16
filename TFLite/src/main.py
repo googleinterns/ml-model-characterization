@@ -1,6 +1,6 @@
+from common import Storage
 import TFLiteParser
 import os
-from common import Storage
 import argparse
 
 import timeit
@@ -8,14 +8,14 @@ import timeit
 # Function to load data in models/filename to spanner DB
 def load_data(filename, model_name, category):
     tflite_parser = TFLiteParser.TFLiteParser()
-    graph = tflite_parser.parse_graph("models/" + filename, model_name, category)
+    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, model_name, category)
     storage = Storage.Storage('ml-models-characterization-db', 'models_db')
     storage.load_data(graph)
 
 # Run inference on models/filename and print graph, operators and tensors
 def run_inference(filename, model_name = None, category = None):
     tflite_parser = TFLiteParser.TFLiteParser()
-    graph = tflite_parser.parse_graph("./models/" + filename, model_name, category)
+    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, model_name, category)
 
     print("Name of model:", graph.model_name)
     print("Number of inputs:", graph.num_inputs)
@@ -32,17 +32,17 @@ if __name__ == "__main__":
     # modelname must be unique for every model added to the database
     # category is the category of problem the model solves ex. Object Detection
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename')
-    parser.add_argument('model_name')
-    parser.add_argument('category') 
+    parser.add_argument('--filename')
+    parser.add_argument('--model_name')
+    parser.add_argument('--category') 
     args = parser.parse_args()
 
     filename = args.filename
     model_name = args.model_name
     category = args.category
 
-    load_data(filename, model_name, category)
+    # load_data(filename, model_name, category)
 
     # get_duplication()
 
-    # run_inference(filename, model_name, category)
+    run_inference(filename, model_name, category)

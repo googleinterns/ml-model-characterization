@@ -17,13 +17,15 @@ class TFParser:
     def __init__(self):
         pass
 
-    def parse_graph(self, filepath, model_name, category, is_saved_model):
+    def parse_graph(self, filepath, model_name, category, is_saved_model, input_operation_names):
         if is_saved_model == "True":
             saved_model = tf.core.protobuf.saved_model_pb2.SavedModel()
             with tf.io.gfile.GFile(filepath, "rb") as f:
                 saved_model.ParseFromString(f.read())
             meta_graph = saved_model.meta_graphs[0]
             graph_def = meta_graph.graph_def
+
+            tf.io.write_graph(graph_def, "/home/shobhitbehl", "Test1.pb")
 
         else:
             with tf.io.gfile.GFile(filepath, "rb") as f:
@@ -45,7 +47,6 @@ class TFParser:
 
             # tensor and operation to index mapping
             tensor_to_index = dict()
-            operation_to_index = dict()
 
             # Loop to populate to_nodes and from_nodes
             for operation in graph.get_operations():
@@ -53,24 +54,20 @@ class TFParser:
                 # Leaving out const operations
                 if operation.node_def.op == "Const":
                     continue
-                # print(operation.node_def.op)
+
                 # Converting operation to nodes
                 new_node = self._OP_TO_NODE.convert(operation)
                 node_index = len(nodes)
                 nodes.append(new_node)
 
-                # Input node, also the start node to the graph
-                if operation.node_def.op == "Placeholder":
-                    new_node.operator_type = "Input_Placeholder"
-                    new_node.label = "Input_Placeholder"
+                # Add input_operation_names to start_node_indices
+                if operation.name in input_operation_names:
                     start_node_indices.append(node_index)
 
-                # If operation has no inputs, mark as start node for graph
-                if len(operation.inputs) == 0:
-                    if len(operation.outputs) != 0:
-                        start_node_indices.append(node_index)
-                    else:
-                        continue
+                # Input node, also the start node to the graph
+                if operation.node_def.op == "Placeholder":
+                    new_node.label = "Input_Placeholder"
+                    start_node_indices.append(node_index)
 
                 # Input and output edges to the node, 
                 # populating from_nodes and to_nodes
@@ -132,7 +129,10 @@ class TFParser:
 
                     # If no outgoing edges, assign label as output
                     if src_node_index not in adj_list:
-                        nodes[src_node_index].label = "Output_Placeholder"
+                        op_type = nodes[src_node_index].operator_type
+                        if ("VariableOp" not in op_type and op_type != "Assert" 
+                                and op_type != "Unpack"):
+                            nodes[src_node_index].label = "Output_Placeholder"
                         continue
                     
                     for [edge_index, dest_node_index] in adj_list[src_node_index]:

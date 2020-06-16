@@ -62,6 +62,10 @@ class OpToNode:
             axis_tensor = operation.inputs[len(operation.inputs) - 1]
             node.axis = int(tf.get_static_value(axis_tensor))
 
+        elif op == "Cast":
+            node.in_data_type = str(attr['SrcT'])[9:-1]
+            node.out_data_type = str(attr['DstT'])[9:-1]
+
         return node
 
     def convert(self, operation):
