@@ -134,4 +134,5 @@ class TFLiteParser:
                     adj_list[node1_index].append([edge_index, node2_index])
             
         graph = Graph.Graph(nodes, start_node_indices, edges, adj_list, model_name, category)
+        graph.source = "TFLite"
         return graph             

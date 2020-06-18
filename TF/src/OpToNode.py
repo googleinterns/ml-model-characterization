@@ -69,8 +69,8 @@ class OpToNode:
         return node
 
     def convert(self, operation):
-        new_node = Node.Node(label = operation.name, value = None)
-        new_node.operator_type = operation.node_def.op
+        node = Node.Node(label = operation.name, value = None)
+        node.operator_type = operation.node_def.op
 
-        new_node = self._attr_from_node_def(operation, new_node)
-        return new_node
+        node = self._attr_from_node_def(operation, node)
+        return node

@@ -61,7 +61,7 @@ class Storage:
             return
 
         # Number of nodes to be processed per batch 
-        num_attributes = len(vars(graph.nodes[0]))
+        num_attributes = len(vars(graph.nodes[0])) + 2
         num_nodes_per_batch = 20000 // num_attributes
 
         num_nodes = len(graph.nodes)
@@ -152,7 +152,7 @@ class Storage:
         tensor_id = 0
 
         # Number of edges to be processed per batch
-        num_attributes = len(vars(graph.edges[0]))
+        num_attributes = len(vars(graph.edges[0])) + 4
         num_edges_per_batch = 20000 // num_attributes
         
         edge_indices = list(to_nodes.keys())

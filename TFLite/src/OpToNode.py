@@ -10,6 +10,52 @@ from common import Node
 
 class OpToNode:
 
+
+    # Operator mapping from TFLite to TF for consisitency in DB
+    # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/toco/model.h
+    # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/toco/tflite/operator.cc
+
+    #Not all ops have a one-one mapping.
+    _OP_TFLITE_TO_TF = {
+        "ADD" : "Add", "AddN" : "ADD_N", "DIV" : "Div", "SUB" : "Sub",
+        "AVERAGE_POOL_2D" : "AveragePool", "SpaceToBatchND" : "SPACE_TO_BATCH_ND",
+        "BATCH_TO_SPACE_ND" : "BatchToSpaceND", "CONCATENATION" : "Concat", 
+        "CONV_2D" : "Conv2D", "DEPTHWISE_CONV_2D" : "DepthwiseConv2dNative",
+        "DEQUANTIZE" : "Dequantize", "GATHER" : "Gather", 
+        "GATHER_ND" : "GatherNd", "L2_NORMALIZATION" : "L2_NORMALIZATION", 
+        "L2_POOL_2D" : "L2_POOL_2D", "LOCAL_RESPONSE_NORMALIZATION" : "LRN", 
+        "MAX_POOL_2D" : "MaxPool", "MUL" : "Mul",  "PAD" : "Pad",
+        "PADV2" : "PadV2", "RESHAPE" : "Reshape", "SOFTMAX" : "Softmax",
+        "SPACE_TO_DEPTH" : "SpaceToDepth", "DEPTH_TO_SPACE" : "DepthToSpace",
+        "TRANSPOSE" : "Transpose", "MEAN" : "Mean", "SUM" : "Sum",
+        "REDUCE_PROD" : "Prod", "REDUCE_MAX" : "Max", "REDUCE_MIN" : "Min",
+        "REDUCE_ANY" : "Any", "RESIZE_BILINEAR" : "ResizeBilinear",
+        "RESIZE_NEAREST_NEIGHBOR" : "ResizeNearestNeighbor", "SQUEEZE" : "Squeeze",
+        "SPLIT" : "Split", "SPLIT_V" : "SplitV", "STRIDED_SLICE" : "StridedSlice",
+        "TOPK_V2" : "TopKV2", "CAST" : "Cast", "ARG_MAX" : "ArgMax", 
+        "ARG_MIN" : "ArgMin", "TILE" : "Tile", "EXPAND_DIMS" : "ExpandDims",
+        "TRANSPOSE_CONV" : "Conv2DBackpropInput", 
+        "SPARSE_TO_DENSE" : "SparseToDense", "SHAPE" : "Shape",
+        "PACK" : "Pack", "ONE_HOT" : "OneHot", "UNPACK" : "Unpack",
+        "LEAKY_RELU" : "LeakyRelu", "SQUARED_DIFFERENCE" : "SquaredDifference",
+        "MIRROR_PAD" : "MirrorPad", "UNIQUE" : "Unique", "WHERE" : "Where",
+        "REVERSE_SEQUENCE" : "ReverseSequence", "MATRIX_DIAG" : "MatrixDiag",
+        "MATRIX_SET_DIAG" : "MatrixSetDiag", "FLOOR" : "Floor", "CEIL" : "Ceil",
+        "ELU" : "Elu", "ROUND" : "Round", "RELU" : "Relu", "RELU6" : "Relu6",
+        "LOGISTIC" : "Sigmoid", "TANH" : "Tanh", "EXP" : "Exp", "COS" : "Cos",
+        "LOG_SOFTMAX" : "LogSoftmax", "MAXIMUM" : "Maximum", "MINIMUM" : "Minimum",
+        "GREATER" : "Greater", "GREATER_EQUAL" : "GreaterEqual", "LESS" : "Less",
+        "LESS_EQUAL" : "LessEqual", "EQUAL" : "Equal", "NOT_EQUAL" : "NotEqual",
+        "NEG" : "Neg", "SELECT" : "Select", "SLICE" : "Slice", "POW" : "Pow",
+        "LOGICAL_OR" : "LogicalOr", "LOGICAL_AND" : "LogicalAnd",
+        "LOGICAL_NOT" : "LogicalNot", "FLOOR_DIV" : "FloorDiv", 
+        "FLOOR_MOD" : "FloorMod", "RANGE" : "Range", "SIN" : "Sin", 
+        "LOG" : "Log", "SQRT" : "Sqrt", "RSQRT" : "Rsqrt", "SQUARE" : "Square",
+        "ZEROS_LIKE" : "ZerosLike", "ABS" : "Abs", "HARD_SWISH" : "HardSwish",
+        "FILL" : "Fill", "REVERSE_V2" : "ReverseV2", "RANK" : "Rank",
+        "SEGMENT_SUM" : "SegmentSum", "SCATTER_ND" : "ScatterNd"
+    }
+
     def __init__(self):
 
         # Dictionaries for enum value to enum name mapping
@@ -689,5 +735,7 @@ class OpToNode:
 
         type_val = operator.BuiltinOptionsType()
         node = node_options[type_val](self, operator, node)
+        if node.operator_type in self._OP_TFLITE_TO_TF:
+            node.operator_type = self._OP_TFLITE_TO_TF[node.operator_type]
 
         return node

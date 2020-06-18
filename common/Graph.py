@@ -12,6 +12,7 @@ class Graph:
         self.start_node_indices = start_node_indices
         self.edges = edges
         self.adj_list = adj_list
+        self.source = None
         self.category = category
         self.model_name = model_name
         self.num_inputs = self.calc_num_inputs()

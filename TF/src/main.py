@@ -21,9 +21,9 @@ def run_inference(filename, model_name, category, is_saved_model, input_operatio
     print("Number of outputs:", graph.num_outputs)
     print("Max fan-in:", graph.max_fan_in)
     print("Max fan-out:", graph.max_fan_out)
-    # graph.print_graph()
+    graph.print_graph()
     graph.print_nodes()
-    # graph.print_edges()
+    graph.print_edges()
 
 if __name__ == "__main__":
     # filename and model_name are arguments to the command line
@@ -32,6 +32,9 @@ if __name__ == "__main__":
     # category is the category of problem the model solves ex. Object Detection
     # is_saved model is either True or False, denoting whether the .pb file 
     # is a frozen graph or saved model
+    # input_operation_names are an optional input to manually give 
+    # start nodes to graph, The start nodes will be 
+    # [input_operation_names] + Placeholders
     parser = argparse.ArgumentParser()
     parser.add_argument('--filename')
     parser.add_argument('--model_name')

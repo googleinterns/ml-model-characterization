@@ -17,18 +17,19 @@ class TFParser:
     def __init__(self):
         pass
 
-    def parse_graph(self, filepath, model_name, category, is_saved_model, input_operation_names):
+    def parse_graph(self, file_path, model_name, category, is_saved_model, input_operation_names):
         if is_saved_model == "True":
             saved_model = tf.core.protobuf.saved_model_pb2.SavedModel()
-            with tf.io.gfile.GFile(filepath, "rb") as f:
+            with tf.io.gfile.GFile(file_path, "rb") as f:
                 saved_model.ParseFromString(f.read())
+
             meta_graph = saved_model.meta_graphs[0]
             graph_def = meta_graph.graph_def
 
-            tf.io.write_graph(graph_def, "/home/shobhitbehl", "Test1.pb")
+            # tf.io.write_graph(graph_def, "/home/shobhitbehl/GraphDef", model_name + ".pb")
 
         else:
-            with tf.io.gfile.GFile(filepath, "rb") as f:
+            with tf.io.gfile.GFile(file_path, "rb") as f:
                 graph_def = tf.compat.v1.GraphDef()
                 graph_def.ParseFromString(f.read())
         
@@ -193,8 +194,8 @@ class TFParser:
             adj_list = new_adj_list
             del new_adj_list
 
-            new_graph = Graph.Graph(nodes, start_node_indices, edges, adj_list,
+            graph = Graph.Graph(nodes, start_node_indices, edges, adj_list,
                                     model_name, category)
-
-            return new_graph
+            graph.source = "TF"
+            return graph
 
