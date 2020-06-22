@@ -27,84 +27,98 @@ class Storage:
 
     # Internal function to load graph metadata into the Models table
     def _load_model(self, graph):
-        # To store the database column names and their values to be inserted
-        columns = list()
-        values = list()
 
-        # Adding Graph attributes and their values to columns and values
-        attrs = vars(graph)
-        for item in attrs.items():
-            if (item[0] != 'nodes' and item[0] != 'start_node_indices' 
-                and item[0] != 'edges' and item[0] != 'adj_list'):
-                columns.append(item[0])
-                values.append(item[1])
+        try:
+            # To store the database column names and their values to be inserted
+            columns = list()
+            values = list()
 
-        columns = tuple(columns)
-        values = tuple(values)
+            # Adding Graph attributes and their values to columns and values
+            attrs = vars(graph)
+            for item in attrs.items():
+                if (item[0] != 'nodes' and item[0] != 'start_node_indices' 
+                    and item[0] != 'edges' and item[0] != 'adj_list'):
+                    columns.append(item[0])
+                    values.append(item[1])
 
-        # Inserting into database
-        with self.database.batch() as batch:
-            batch.insert(
-                table = 'Models',
-                columns = columns,
-                values = [values]
-            )
+            columns = tuple(columns)
+            values = tuple(values)
+
+            # Inserting into database
+            with self.database.batch() as batch:
+                batch.insert(
+                    table = 'Models',
+                    columns = columns,
+                    values = [values]
+                )
+            return True
+        except Exception as e:
+            print(e)
+            return False 
 
             
 
     # Internal function to load operator(Node) data into Operators table     
     def _load_operators(self, graph):
-        # Surrogate Id for operators and iterating index
-        operator_id = 0
+        try:
+            # Surrogate Id for operators and iterating index
+            operator_id = 0
 
-        if len(graph.nodes) == 0:
-            return
+            if len(graph.nodes) == 0:
+                return
 
-        # Number of nodes to be processed per batch 
-        num_attributes = len(vars(graph.nodes[0])) + 2
-        num_nodes_per_batch = 20000 // num_attributes
+            # Number of nodes to be processed per batch 
+            num_attributes = len(vars(graph.nodes[0])) + 2
+            num_nodes_per_batch = 20000 // num_attributes
 
-        num_nodes = len(graph.nodes)
+            num_nodes = len(graph.nodes)
 
-        # Inserting data into the Operators table
+            # Inserting data into the Operators table
 
-        # Loop till all nodes are inserted
-        while operator_id < num_nodes:
-            # Creating and inserting a batch
-            with self.database.batch() as batch:
-                for _ in range(num_nodes_per_batch):
-                    if operator_id == num_nodes:
-                        break
+            # Loop till all nodes are inserted
+            while operator_id < num_nodes:
+                # Creating and inserting a batch
+                with self.database.batch() as batch:
+                    for _ in range(num_nodes_per_batch):
+                        if operator_id == num_nodes:
+                            break
 
-                    node = graph.nodes[operator_id]
+                        node = graph.nodes[operator_id]
 
-                    # To store the database column names and their values 
-                    # to be inserted
-                    columns = ['model_name', 'operator_id']
-                    values = [graph.model_name, operator_id + 1]
+                        # To store the database column names and their values 
+                        # to be inserted
+                        columns = ['model_name', 'operator_id']
+                        values = [graph.model_name, operator_id + 1]
 
-                    # Adding Node attributes and their values to 
-                    # columns and values
-                    attrs = vars(node)
-                    for item in attrs.items():
-                        if item[0] != 'label' and item[0] != 'value':
-                            columns.append(item[0])
-                            values.append(item[1])
+                        # Adding Node attributes and their values to 
+                        # columns and values
+                        attrs = vars(node)
+                        for item in attrs.items():
+                            if item[0] != 'label' and item[0] != 'value':
+                                columns.append(item[0])
+                                values.append(item[1])
 
-                    columns = tuple(columns)
-                    values = tuple(values)
+                        columns = tuple(columns)
+                        values = tuple(values)
 
-                    # Insert
-                    batch.insert(
-                        table = 'Operators',
-                        columns = columns,
-                        values=  [values]
-                    )
-                    operator_id += 1
+                        # Insert
+                        batch.insert(
+                            table = 'Operators',
+                            columns = columns,
+                            values=  [values]
+                        )
+                        operator_id += 1
+            return True
+        except Exception as e:
+            print(e)
+            query = "DELETE FROM Models WHERE model_name = \'" + graph.model_name + "\'"
+            deleted_rows = self.database.execute_partitioned_dml(
+                query
+            )
+            return False
 
     # Internal function to load tensor(Edge) data into Tensors table
     def _load_tensors(self, graph):
-
         if len(graph.edges) == 0:
             return
 
@@ -148,61 +162,82 @@ class Storage:
                             vis[dest_node_index] = True
                             queue.put(dest_node_index)
 
-        # Surrogate Id for tensors
-        tensor_id = 0
+        try:
+            # Surrogate Id for tensors
+            tensor_id = 0
 
-        # Number of edges to be processed per batch
-        num_attributes = len(vars(graph.edges[0])) + 4
-        num_edges_per_batch = 20000 // num_attributes
-        
-        edge_indices = list(to_nodes.keys())
-        num_edges = len(edge_indices)
+            # Number of edges to be processed per batch
+            num_attributes = len(vars(graph.edges[0])) + 4
+            num_edges_per_batch = 20000 // num_attributes
+            
+            edge_indices = list(to_nodes.keys())
+            num_edges = len(edge_indices)
 
-        # Inserting data into the Tensors table
-        # Looping till all edges are inserted
-        while tensor_id < num_edges:
-            # Creating and inserting a batch
-            with self.database.batch() as batch:
-                for _ in range(num_edges_per_batch):
-                    if tensor_id == num_edges:
-                        return
+            # Inserting data into the Tensors table
+            # Looping till all edges are inserted
+            while tensor_id < num_edges:
+                # Creating and inserting a batch
+                with self.database.batch() as batch:
+                    for _ in range(num_edges_per_batch):
+                        if tensor_id == num_edges:
+                            break
 
-                    edge_index = edge_indices[tensor_id]
-                    edge = graph.edges[edge_index]
-                    to_operator_ids = list(to_nodes[edge_index])
-                    from_operator_ids = list(from_nodes[edge_index])
+                        edge_index = edge_indices[tensor_id]
+                        edge = graph.edges[edge_index]
+                        to_operator_ids = list(to_nodes[edge_index])
+                        from_operator_ids = list(from_nodes[edge_index])
 
-                    # To store the database column names and their 
-                    # values to be inserted
-                    columns = [
-                        'model_name', 'tensor_id', 
-                        'from_operator_ids', 'to_operator_ids'
-                        ]
-                    values = [
-                        graph.model_name, tensor_id + 1, 
-                        from_operator_ids, to_operator_ids
-                        ]
+                        # To store the database column names and their 
+                        # values to be inserted
+                        columns = [
+                            'model_name', 'tensor_id', 
+                            'from_operator_ids', 'to_operator_ids'
+                            ]
+                        values = [
+                            graph.model_name, tensor_id + 1, 
+                            from_operator_ids, to_operator_ids
+                            ]
 
-                    # Adding Edge attributes and their values to columns and values
-                    attrs = vars(edge)
-                    for item in attrs.items():
-                        if item[0] != 'label' and item[0] != 'value':
-                            columns.append(item[0])
-                            values.append(item[1])
+                        # Adding Edge attributes and their values to columns and values
+                        attrs = vars(edge)
+                        for item in attrs.items():
+                            if item[0] != 'label' and item[0] != 'value':
+                                columns.append(item[0])
+                                values.append(item[1])
 
-                    columns = tuple(columns)
-                    values = tuple(values)
+                        columns = tuple(columns)
+                        values = tuple(values)
 
-                    # Insert 
-                    batch.insert(
-                        table = 'Tensors',
-                        columns = columns,
-                        values = [values]
-                    )
-                    tensor_id += 1
+                        # Insert 
+                        batch.insert(
+                            table = 'Tensors',
+                            columns = columns,
+                            values = [values]
+                        )
+                        tensor_id += 1
+            return True
+        except Exception as e:
+            print(e)
+            query = "DELETE FROM Models WHERE model_name = \'" + graph.model_name + "\'"
+            deleted_rows = self.database.execute_partitioned_dml(
+                query
+            )
+            return False
 
     # Function to load data for given Graph to Spanner Database
     def load_data(self, graph):
-        self._load_model(graph)
-        self._load_operators(graph)
-        self._load_tensors(graph)
+
+        loaded = self._load_model(graph)
+        if not loaded:
+            print('Data Loading Failed in _load_model')
+            return 
+        
+        loaded = self._load_operators(graph)
+        if not loaded:
+            print('Data Loading Failed in _load_operators')
+            return 
+        
+        loaded = self._load_tensors(graph)
+        if not loaded:
+            print('Data Loading Failed in _load_tensors')
+            return 

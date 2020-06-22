@@ -5,3 +5,4 @@ bazel-*
 TFLite/src/tflite
 */__pycache__
 */models
+*/.ipynb_checkpoints

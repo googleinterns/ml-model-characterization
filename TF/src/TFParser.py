@@ -14,6 +14,13 @@ class TFParser:
     _OP_TO_NODE = OpToNode.OpToNode()
     _TENSOR_TO_EDGE = TensorToEdge.TensorToEdge()
 
+    # Operations that cannot be output nodes and will not be marked
+    # as Ouptut_Placeholder even if no outgoing edges are present
+    _NOT_OUTPUT = [
+        "Assert", "Unpack", "Placeholder", "StridedSlice", "Less", 
+        "StopGradient", "Mean", "Exit", "ExpandDims", "Shape", "Merge",
+        ]
+
     def __init__(self):
         pass
 
@@ -26,7 +33,7 @@ class TFParser:
             meta_graph = saved_model.meta_graphs[0]
             graph_def = meta_graph.graph_def
 
-            # tf.io.write_graph(graph_def, "/home/shobhitbehl/GraphDef", model_name + ".pb")
+            tf.io.write_graph(graph_def, "/home/shobhitbehl/GraphDef", model_name + ".pb")
 
         else:
             with tf.io.gfile.GFile(file_path, "rb") as f:
@@ -131,8 +138,9 @@ class TFParser:
                     # If no outgoing edges, assign label as output
                     if src_node_index not in adj_list:
                         op_type = nodes[src_node_index].operator_type
-                        if ("VariableOp" not in op_type and op_type != "Assert" 
-                                and op_type != "Unpack"):
+                        if ("VariableOp" not in op_type 
+                            and op_type not in self._NOT_OUTPUT):
+                            # print(op_type, operation.name)
                             nodes[src_node_index].label = "Output_Placeholder"
                         continue
                     

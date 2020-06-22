@@ -23,7 +23,7 @@ def run_inference(filename, model_name, category, is_saved_model, input_operatio
     print("Max fan-out:", graph.max_fan_out)
     graph.print_graph()
     graph.print_nodes()
-    graph.print_edges()
+    # graph.print_edges()
 
 if __name__ == "__main__":
     # filename and model_name are arguments to the command line
@@ -49,10 +49,10 @@ if __name__ == "__main__":
     is_saved_model = args.is_saved_model
     input_operation_names = args.input_operation_names
 
-    # load_data(filename, model_name, category, is_saved_model, input_operation_names)
+    load_data(filename, model_name, category, is_saved_model, input_operation_names)
 
     # get_duplication()
 
-    run_inference(filename, model_name, category, is_saved_model, input_operation_names)
+    # run_inference(filename, model_name, category, is_saved_model, input_operation_names)
 
 

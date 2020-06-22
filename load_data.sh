@@ -35,3 +35,11 @@ bazel-bin/tf_main --filename tweening_conv3d_bair_1_VideoGeneration_SavedModel.p
 bazel-bin/tf_main --filename local-linearity_cifar10_1_ImageClassification_SavedModel.pb --model_name local-linearity_cifar10_1 --category ImageClassification  --is_saved_model True
 bazel-bin/tf_main --filename wae-mmd_1_ImageFeatureVector_SavedModel.pb --model_name wae-mmd_1 --category ImageFeatureVector --is_saved_model True
 bazel-bin/tf_main --filename videoflow_encoder_1_VideoGeneration_SavedModel.pb --model_name videoflow_encoder_1 --category VideoGeneration --is_saved_model True
+bazel-bin/tf_main --filename vae_1_ImageFeatureVector_SavedModel.pb --model_name vae_1 --category ImageFeatureVector --is_saved_model True
+bazel-bin/tf_main --filename ganeval-cifar10-convnet_1_ImageClassification_SavedModel.pb --model_name ganeval-cifar10-convnet_1 --category ImageClassification --is_saved_model True
+bazel-bin/tf_main --filename wiki40b-lm-en_1_TextLanguageModel_SavedModel.pb --model_name wiki40b-lm-en_1 --category TextLanguageModel --is_saved_model True
+bazel-bin/tf_main --filename small_bert_bert_uncased_L-4_H-256_A-4_1_TextEmbedding_SavedModel.pb --model_name small_bert_bert_uncased_L-4_H-256_A-4_1 --category TextEmbedding --is_saved_model True
+bazel-bin/tf_main --filename elmo_3_TextEmbedding_SavedModel.pb --model_name elmo_3 --category TextEmbedding --is_saved_model True
+bazel-bin/tf_main --filename mil-nce_s3d_1_VideoText_SavedModel.pb --model_name mil-nce_s3d_1 --category VideoText --is_saved_model True
+bazel-bin/tf_main --filename LAReQA_mBERT_En_En_1_TextRetrievalQuestionAnswering_SavedModel.pb --model_name LAReQA_mBERT_En_En_1 --category TextRetrievalQuestionAnswering --is_saved_model True
+bazel-bin/tf_main --filename delf_1_ImageOthers_SavedModel.pb --model_name delf_1 --category ImageOthers --is_saved_model True
