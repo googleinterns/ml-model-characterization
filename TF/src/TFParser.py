@@ -19,6 +19,7 @@ class TFParser:
     _NOT_OUTPUT = [
         "Assert", "Unpack", "Placeholder", "StridedSlice", "Less", 
         "StopGradient", "Mean", "Exit", "ExpandDims", "Shape", "Merge",
+        "ApplyAdam", "AssignSub", "BiasAddGrad", "Conv2DBackpropFilter"
         ]
 
     def __init__(self):
@@ -201,6 +202,15 @@ class TFParser:
 
             adj_list = new_adj_list
             del new_adj_list
+
+            # for index, node in enumerate(nodes):
+            #     if node.operator_type == "Reshape":
+            #         if index in adj_list:
+            #             print(adj_list[index])
+            #             for _, node_index in adj_list[index]:
+            #                 print(nodes[node_index].operator_type)
+            #                 if nodes[node_index].operator_type == "MatMul":
+            #                     print("Got One!")
 
             graph = Graph.Graph(nodes, start_node_indices, edges, adj_list,
                                     model_name, category)

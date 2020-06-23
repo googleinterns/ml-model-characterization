@@ -54,5 +54,3 @@ if __name__ == "__main__":
     # get_duplication()
 
     # run_inference(filename, model_name, category, is_saved_model, input_operation_names)
-
-
