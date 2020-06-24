@@ -1,31 +1,56 @@
+"""Module with TFParser class to parse TF files"""
+
+from queue import Queue
 import tensorflow as tf
 import tensorflow_text
-from common import Graph
-from common import Node
-import OpToNode
+
 import TensorToEdge
-from queue import Queue
+import OpToNode
+from common import Graph
 
-# Module wiith methods to parse a .pb file (Frozen Graph) and
-# return a Graph object with populated node and edge attributes
+from common import Node
+
 class TFParser:
+    """Class to parse TF files
 
-    # Class instances to convert ops to nodes and tensors to edges
-    _OP_TO_NODE = OpToNode.OpToNode()
-    _TENSOR_TO_EDGE = TensorToEdge.TensorToEdge()
+    Contains parsing for SavedModel and FrozenGraph formats.
+    """
 
-    # Operations that cannot be output nodes and will not be marked
-    # as Ouptut_Placeholder even if no outgoing edges are present
+    _OP_TO_NODE = OpToNode.OpToNode() # For converting operations to nodes
+    _TENSOR_TO_EDGE = TensorToEdge.TensorToEdge() # For converting tensors to edges
+
     _NOT_OUTPUT = [
         "Assert", "Unpack", "Placeholder", "StridedSlice", "Less", 
         "StopGradient", "Mean", "Exit", "ExpandDims", "Shape", "Merge",
         "ApplyAdam", "AssignSub", "BiasAddGrad", "Conv2DBackpropFilter"
-        ]
+        ] # List of operations which cannot be output nodes
+        # Tentative list based on graph analysis of models.
 
     def __init__(self):
         pass
 
-    def parse_graph(self, file_path, model_name, category, is_saved_model, input_operation_names):
+    def parse_graph(self, file_path, model_name, category, 
+                        is_saved_model, input_operation_names):
+        """Method to parse file and Create a corresponding Graph object
+
+        Reads a GraphDef from SavedModel or FrozenGraph file and extracts 
+        operations, tensors, graph structure and metadata and stores it 
+        into a Graph, Node and Edge objects. Nodes are operations 
+        and edges are tensors.
+
+        Args:
+            file_path (str): path of the file to parse
+            model_name (str): unique model name of the model being parsed.
+            category (str): problem category of the model.
+            is_saved_model (str, optional): "True" if file is in SavedModel format, 
+                defaults to "True".
+            input_operation_names (list of str, optional) : Names of the operations 
+                that are inputs to the model, defaults to [].
+
+        Returns:
+            The Graph object created for the file.
+        """
+        
         if is_saved_model == "True":
             saved_model = tf.core.protobuf.saved_model_pb2.SavedModel()
             with tf.io.gfile.GFile(file_path, "rb") as f:
@@ -34,33 +59,27 @@ class TFParser:
             meta_graph = saved_model.meta_graphs[0]
             graph_def = meta_graph.graph_def
 
-            tf.io.write_graph(graph_def, "/home/shobhitbehl/GraphDef", model_name + ".pb")
-
         else:
             with tf.io.gfile.GFile(file_path, "rb") as f:
                 graph_def = tf.compat.v1.GraphDef()
                 graph_def.ParseFromString(f.read())
         
         with tf.Graph().as_default() as graph:
-            tf.import_graph_def(graph_def, name="")
+            tf.import_graph_def(graph_def, name = "")
 
             # Dictionary to store origin and destination nodes for each edge
-            # Nodes are operations, edges are tensors
             to_nodes = dict()
             from_nodes = dict()
 
-            # Lists to store Nodes and Edges
             edges = list()
             nodes = list()
             start_node_indices = list()
 
-            # tensor and operation to index mapping
             tensor_to_index = dict()
 
             # Loop to populate to_nodes and from_nodes
             for operation in graph.get_operations():
 
-                # Leaving out const operations
                 if operation.node_def.op == "Const":
                     continue
 
@@ -78,7 +97,6 @@ class TFParser:
                     new_node.label = "Input_Placeholder"
                     start_node_indices.append(node_index)
 
-                # Input and output edges to the node, 
                 # populating from_nodes and to_nodes
                 for in_tensor in list(operation.inputs):
                     if in_tensor not in tensor_to_index:
@@ -119,11 +137,9 @@ class TFParser:
 
             # List of nodes contains nodes that are never visited by a traversal.
             # Assuming these are weights and biases,
-            # Following code discards them
-            # Also calculated output nodes
+            # following code discards them and also calculates output nodes
 
-            # List to store visit status of node, 
-            # but 0 means visited and 1 means unvisited
+            # List to store visit status of node, 0 is visited and 1 otherwise
             visited = [1] * len(nodes)
 
             queue = Queue()
@@ -153,8 +169,6 @@ class TFParser:
             # Calculate cumulative sum of visited and remove all unvisited nodes
             # After summing, value stored in current index of visited will tell 
             # how many nodes have been deleted with index <= current index
-
-            # new_nodes to store only nodes reached by traversal
 
             new_nodes = list()
             for index in range(len(nodes)):
@@ -203,17 +217,7 @@ class TFParser:
             adj_list = new_adj_list
             del new_adj_list
 
-            # for index, node in enumerate(nodes):
-            #     if node.operator_type == "Reshape":
-            #         if index in adj_list:
-            #             print(adj_list[index])
-            #             for _, node_index in adj_list[index]:
-            #                 print(nodes[node_index].operator_type)
-            #                 if nodes[node_index].operator_type == "MatMul":
-            #                     print("Got One!")
-
             graph = Graph.Graph(nodes, start_node_indices, edges, adj_list,
                                     model_name, category)
             graph.source = "TF"
             return graph
-

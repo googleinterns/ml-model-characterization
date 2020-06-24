@@ -1,21 +1,47 @@
-from common import Storage
-import TFLiteParser
-import os
+""" main module to run inference or load data into database
+
+Contains functions to load model data into database or run inference 
+and print it.
+
+CLA to module and Args to all functions in module:
+    filename (str): name of the file to be parsed. Must be present in 
+        models directory.
+    model_name (str): unique model name of the model being parsed.
+    category (str): problem category of the model.
+"""
+
 import argparse
+import os
 
-import timeit
+import TFLiteParser
+from common import Storage
 
-# Function to load data in models/filename to spanner DB
 def load_data(filename, model_name, category):
+    """Function to parse TFLite file and load data into spanner database
+
+    Parses a TFLite file into a Graph object and stores the Graph into a 
+    spanner database.
+    """
+
     tflite_parser = TFLiteParser.TFLiteParser()
-    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, model_name, category)
-    storage = Storage.Storage('ml-models-characterization-db', 'models_db')
+    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, 
+                model_name, category)
+
+    # Constants for spanner DB details
+    INSTANCE_ID = 'ml-models-characterization-db'
+    DATABASE_ID = 'models_db'
+
+    storage = Storage.Storage(INSTANCE_ID, DATABASE_ID)
     storage.load_data(graph)
 
-# Run inference on models/filename and print graph, operators and tensors
-def run_inference(filename, model_name = None, category = None):
+def run_inference(filename, model_name, category):
+    """Function to parse TFLite file and print graph information
+
+    Parses a TFLite file and prints the metadata, graph structure, nodes and edges
+    """
     tflite_parser = TFLiteParser.TFLiteParser()
-    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, model_name, category)
+    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, 
+                model_name, category)
 
     print("Name of model:", graph.model_name)
     print("Number of inputs:", graph.num_inputs)
@@ -27,14 +53,10 @@ def run_inference(filename, model_name = None, category = None):
     graph.print_edges()
 
 if __name__ == "__main__":
-    # filename and model_name are arguments to the command line
-    # filename must be present in the models directory
-    # modelname must be unique for every model added to the database
-    # category is the category of problem the model solves ex. Object Detection
     parser = argparse.ArgumentParser()
     parser.add_argument('--filename')
     parser.add_argument('--model_name')
-    parser.add_argument('--category') 
+    parser.add_argument('--category', default = "None") 
     args = parser.parse_args()
 
     filename = args.filename
@@ -42,7 +64,5 @@ if __name__ == "__main__":
     category = args.category
 
     # load_data(filename, model_name, category)
-
-    # get_duplication()
 
     run_inference(filename, model_name, category)

@@ -1,11 +1,26 @@
+"""Module to initialise and generate code for parsing tflite files"""
+
 import os
 
-#function to compile schema.fbs with flatc and generate code files
-def init_tflite_files(schema_path, out_path):
+SCHEMA_PATH = "./TFLite/schema.fbs"
+OUT_PATH = "./TFLite/src/"
+
+def init_tflite_files():
+    """Function to generate code files from flatbuffer schema
+
+    Compiles flatbuffer schema using flatc compiler and generates code files
+    for reading the .tflite file.
+
+    Args:
+        schema_path (str) : Path to schema.fbs downloaded from
+            https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/schema/schema.fbs
+        out_path (str) : Path to store generated code files
+
+    """
     print("Creating tflite files")
 
     # Compiling schema.fbs into python code
-    os.system('flatc --python -o ' + out_path + ' ' + schema_path)
+    os.system('flatc --python -o ' + OUT_PATH + ' ' + SCHEMA_PATH)
 
     #Echoing code to __init__.py for corect funtioning of 'from tflite import *'
     os.system(
@@ -18,13 +33,9 @@ def init_tflite_files(schema_path, out_path):
         '       str_modules += path.basename(module)[:-3] + \' \'\n\n'
         'str_modules = str_modules[:-1]\n'
         '__all__ = str_modules.split(\' \')\n" '
-        '> ' + out_path + 'tflite/__init__.py'
+        '> ' + OUT_PATH + 'tflite/__init__.py'
     )
 
 if __name__ == "__main__":
 
-    # Path to schema and path where the directory should be generated
-    schema_path = "./TFLite/schema.fbs"
-    out_path = "./TFLite/src/"
-
-    init_tflite_files(schema_path, out_path)
+    init_tflite_files()

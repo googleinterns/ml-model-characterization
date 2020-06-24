@@ -27,29 +27,29 @@ bazel-bin/tflite_main --filename nasnet_large_ImageClassification.tflite --model
 bazel-bin/tflite_main --filename MobileNet-V3_ImageClassification.tflite --model_name MobileNet-V3 --category ImageClassification
 
 bazel build tf_main
-bazel-bin/tf_main --filename efficientnet_b5_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b5_feature-vector_1 --category ImageFeatureVector --is_saved_model True
-bazel-bin/tf_main --filename progan-128_1_ImageGenerator_SavedModel.pb --model_name progan-128_1 --category ImageGenerator --is_saved_model True
-bazel-bin/tf_main --filename spiral_default-fluid-gansn-celebahq64-gen-19steps_1_ImageRNNAgent_SavedModel.pb --model_name spiral_default-fluid-gansn-celebahq64-gen-19steps_1 --category ImageRNNAgent --is_saved_model True
-bazel-bin/tf_main --filename unet_industrial_class_1_1_ImageSegmentation_SavedModel.pb --model_name unet_industrial_class_1_1 --category ImageSegmentation --is_saved_model True
-bazel-bin/tf_main --filename vision_embedder_inaturalist_V2_1_ImageFeatureVector_SavedModel.pb --model_name vision_embedder_inaturalist_V2_1 --category ImageFeatureVector --is_saved_model True
-bazel-bin/tf_main --filename tweening_conv3d_bair_1_VideoGeneration_SavedModel.pb --model_name tweening_conv3d_bair_1 --category VideoGeneration --is_saved_model True 
-bazel-bin/tf_main --filename local-linearity_cifar10_1_ImageClassification_SavedModel.pb --model_name local-linearity_cifar10_1 --category ImageClassification  --is_saved_model True
-bazel-bin/tf_main --filename wae-mmd_1_ImageFeatureVector_SavedModel.pb --model_name wae-mmd_1 --category ImageFeatureVector --is_saved_model True
-bazel-bin/tf_main --filename videoflow_encoder_1_VideoGeneration_SavedModel.pb --model_name videoflow_encoder_1 --category VideoGeneration --is_saved_model True
-bazel-bin/tf_main --filename vae_1_ImageFeatureVector_SavedModel.pb --model_name vae_1 --category ImageFeatureVector --is_saved_model True
-bazel-bin/tf_main --filename ganeval-cifar10-convnet_1_ImageClassification_SavedModel.pb --model_name ganeval-cifar10-convnet_1 --category ImageClassification --is_saved_model True
-bazel-bin/tf_main --filename wiki40b-lm-en_1_TextLanguageModel_SavedModel.pb --model_name wiki40b-lm-en_1 --category TextLanguageModel --is_saved_model True
-bazel-bin/tf_main --filename small_bert_bert_uncased_L-4_H-256_A-4_1_TextEmbedding_SavedModel.pb --model_name small_bert_bert_uncased_L-4_H-256_A-4_1 --category TextEmbedding --is_saved_model True
-bazel-bin/tf_main --filename elmo_3_TextEmbedding_SavedModel.pb --model_name elmo_3 --category TextEmbedding --is_saved_model True
-bazel-bin/tf_main --filename mil-nce_s3d_1_VideoText_SavedModel.pb --model_name mil-nce_s3d_1 --category VideoText --is_saved_model True
-bazel-bin/tf_main --filename LAReQA_mBERT_En_En_1_TextRetrievalQuestionAnswering_SavedModel.pb --model_name LAReQA_mBERT_En_En_1 --category TextRetrievalQuestionAnswering --is_saved_model True
-bazel-bin/tf_main --filename delf_1_ImageOthers_SavedModel.pb --model_name delf_1 --category ImageOthers --is_saved_model True
-bazel-bin/tf_main --filename faster_rcnn_openimages_v4_inception_resnet_v2_1_ObjectDetection_SavedModel.pb --model_name faster_rcnn_openimages_v4_inception_resnet_v2_1 --category ObjectDetection --is_saved_model True
-bazel-bin/tf_main --filename openimages_v4_ssd_mobilenet_v2_1_ObjectDetection_SavedModel.pb --model_name openimages_v4_ssd_mobilenet_v2_1 --category ObjectDetection --is_saved_model True
-bazel-bin/tf_main --filename biggan-deep-128_1_ImageGenerator_SavedModel.pb --model_name biggan-deep-128_1 --category ImageGenerator --is_saved_model True
-bazel-bin/tf_main --filename biggan-128_2_ImageGenerator_SavedModel.pb --model_name biggan-128_2 --category ImageGenerator --is_saved_model True
-bazel-bin/tf_main --filename bigbigan-resnet50_1_ImageGenerator_SavedModel.pb --model_name bigbigan-resnet50_1 --category ImageGenerator --is_saved_model True
-bazel-bin/tf_main --filename efficientnet_b6_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b6_feature-vector_1 --category ImageFeatureVector --is_saved_model True
-bazel-bin/tf_main --filename efficientnet_b7_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b7_feature-vector_1 --category ImageFeatureVector --is_saved_model True
-bazel-bin/tf_main --filename speech_embedding_1_AudioEmbedding_SavedModel.pb --model_name speech_embedding_1 --category AudioEmbedding --is_saved_model True
-bazel-bin/tf_main --filename compare_gan_model_15_cifar10_resnet_cifar_1_ImageGenerator_SavedModel.pb --model_name compare_gan_model_15_cifar10_resnet_cifar_1 --category ImageGenerator --is_saved_model True
+bazel-bin/tf_main --filename efficientnet_b5_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b5_feature-vector_1 --category ImageFeatureVector 
+bazel-bin/tf_main --filename progan-128_1_ImageGenerator_SavedModel.pb --model_name progan-128_1 --category ImageGenerator 
+bazel-bin/tf_main --filename spiral_default-fluid-gansn-celebahq64-gen-19steps_1_ImageRNNAgent_SavedModel.pb --model_name spiral_default-fluid-gansn-celebahq64-gen-19steps_1 --category ImageRNNAgent 
+bazel-bin/tf_main --filename unet_industrial_class_1_1_ImageSegmentation_SavedModel.pb --model_name unet_industrial_class_1_1 --category ImageSegmentation 
+bazel-bin/tf_main --filename vision_embedder_inaturalist_V2_1_ImageFeatureVector_SavedModel.pb --model_name vision_embedder_inaturalist_V2_1 --category ImageFeatureVector 
+bazel-bin/tf_main --filename tweening_conv3d_bair_1_VideoGeneration_SavedModel.pb --model_name tweening_conv3d_bair_1 --category VideoGeneration
+bazel-bin/tf_main --filename local-linearity_cifar10_1_ImageClassification_SavedModel.pb --model_name local-linearity_cifar10_1 --category ImageClassification  
+bazel-bin/tf_main --filename wae-mmd_1_ImageFeatureVector_SavedModel.pb --model_name wae-mmd_1 --category ImageFeatureVector 
+bazel-bin/tf_main --filename videoflow_encoder_1_VideoGeneration_SavedModel.pb --model_name videoflow_encoder_1 --category VideoGeneration 
+bazel-bin/tf_main --filename vae_1_ImageFeatureVector_SavedModel.pb --model_name vae_1 --category ImageFeatureVector 
+bazel-bin/tf_main --filename ganeval-cifar10-convnet_1_ImageClassification_SavedModel.pb --model_name ganeval-cifar10-convnet_1 --category ImageClassification 
+bazel-bin/tf_main --filename wiki40b-lm-en_1_TextLanguageModel_SavedModel.pb --model_name wiki40b-lm-en_1 --category TextLanguageModel 
+bazel-bin/tf_main --filename small_bert_bert_uncased_L-4_H-256_A-4_1_TextEmbedding_SavedModel.pb --model_name small_bert_bert_uncased_L-4_H-256_A-4_1 --category TextEmbedding 
+bazel-bin/tf_main --filename elmo_3_TextEmbedding_SavedModel.pb --model_name elmo_3 --category TextEmbedding 
+bazel-bin/tf_main --filename mil-nce_s3d_1_VideoText_SavedModel.pb --model_name mil-nce_s3d_1 --category VideoText 
+bazel-bin/tf_main --filename LAReQA_mBERT_En_En_1_TextRetrievalQuestionAnswering_SavedModel.pb --model_name LAReQA_mBERT_En_En_1 --category TextRetrievalQuestionAnswering 
+bazel-bin/tf_main --filename delf_1_ImageOthers_SavedModel.pb --model_name delf_1 --category ImageOthers 
+bazel-bin/tf_main --filename faster_rcnn_openimages_v4_inception_resnet_v2_1_ObjectDetection_SavedModel.pb --model_name faster_rcnn_openimages_v4_inception_resnet_v2_1 --category ObjectDetection 
+bazel-bin/tf_main --filename openimages_v4_ssd_mobilenet_v2_1_ObjectDetection_SavedModel.pb --model_name openimages_v4_ssd_mobilenet_v2_1 --category ObjectDetection 
+bazel-bin/tf_main --filename biggan-deep-128_1_ImageGenerator_SavedModel.pb --model_name biggan-deep-128_1 --category ImageGenerator 
+bazel-bin/tf_main --filename biggan-128_2_ImageGenerator_SavedModel.pb --model_name biggan-128_2 --category ImageGenerator 
+bazel-bin/tf_main --filename bigbigan-resnet50_1_ImageGenerator_SavedModel.pb --model_name bigbigan-resnet50_1 --category ImageGenerator 
+bazel-bin/tf_main --filename efficientnet_b6_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b6_feature-vector_1 --category ImageFeatureVector 
+bazel-bin/tf_main --filename efficientnet_b7_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b7_feature-vector_1 --category ImageFeatureVector 
+bazel-bin/tf_main --filename speech_embedding_1_AudioEmbedding_SavedModel.pb --model_name speech_embedding_1 --category AudioEmbedding 
+bazel-bin/tf_main --filename compare_gan_model_15_cifar10_resnet_cifar_1_ImageGenerator_SavedModel.pb --model_name compare_gan_model_15_cifar10_resnet_cifar_1 --category ImageGenerator 

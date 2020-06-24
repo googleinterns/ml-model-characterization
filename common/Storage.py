@@ -1,39 +1,55 @@
+"""Module with Storage class to store Graph object into a spanner database"""
+
 import os
-from queue import Queue
 from google.cloud import spanner
+from queue import Queue
 
-# Module to store Graph data into database
-# Node object attributes are stored in 'Operators' table
-# Edge object attributes are stored in 'Tensors' table
-# Graph object attributes are stored in 'Models' table
-
-# The attribute names in each case must correspond to a column name in 
-# the database. If any attribute is added in the Class files, 
-# the Storage class will automatically try to add that attribute to the 
-# database the next time it is run with any model
-
-# If an attribute is added to the class file and not to the database,
-# this will throw and error unless explicitly changed
-
-# Spanner allows only 20000 mutations per commit, so _load_operators
-# and _load_tensors implement batching
 class Storage:
+    """ Storage class to store graph into spanner database
 
-    # Initialize spanner client with instance and database
+    Stores the Graph object attributes into the Models table, 
+    Node object into Operators table and Edge object into the Tensors table.
+
+    Attributes:
+        spanner_client (cloud spanner Client object) : Instance to access 
+            spanner API for python.
+        instance (cloud spanner Instance object): Instance to access the 
+            required spanner instance.
+        database (cloud spanner Database object): Instance to access the
+            database where the data needs to be pushed.
+
+    Args:
+        instance_id (str) : Id of the spanner instance.
+        database_id (str) : Id of the database within the spanner instance.
+
+    """
+
+    _MAX_MUTATIONS = 20000 # Number of allowed spanner mutations per commit
+
     def __init__(self, instance_id, database_id):
         self.spanner_client = spanner.Client()
         self.instance = self.spanner_client.instance(instance_id)
         self.database = self.instance.database(database_id)
 
-    # Internal function to load graph metadata into the Models table
     def _load_model(self, graph):
+        """Internal method to store data into the Models table
+
+        Stores Graph instance attributes pertaining to model metadata into 
+        Models table.
+
+        Args:
+            graph (Graph object) : The intance of Graph to be stores in 
+                the Database.
+    
+        Returns:
+            A boolean, True if commit into database is succesful, False otherwise
+        """ 
 
         try:
             # To store the database column names and their values to be inserted
             columns = list()
             values = list()
 
-            # Adding Graph attributes and their values to columns and values
             attrs = vars(graph)
             for item in attrs.items():
                 if (item[0] != 'nodes' and item[0] != 'start_node_indices' 
@@ -44,13 +60,13 @@ class Storage:
             columns = tuple(columns)
             values = tuple(values)
 
-            # Inserting into database
             with self.database.batch() as batch:
                 batch.insert(
                     table = 'Models',
                     columns = columns,
                     values = [values]
                 )
+
             return True
         except Exception as e:
             print(e)
@@ -58,8 +74,25 @@ class Storage:
 
             
 
-    # Internal function to load operator(Node) data into Operators table     
     def _load_operators(self, graph):
+        """Internal method to store data into the Operators table
+
+        Stores attributes of Node instances of given graph, representing 
+        operators, into Operators table. Inserts in batches due to mutation 
+        restriction in spanner.
+        If any of the data batches raises an exception due to an unsuccesful 
+        commit, the model being inserted is deleted from the Models table and 
+        subsequently all children are deleted from Operators table due to
+        ON DELETE CASCADE.
+
+        Args:
+            graph (Graph object) : The intance of Graph to be stored in the 
+                Database.
+    
+        Returns:
+            A boolean, True if commit into database is succesful, False otherwise
+        """ 
+
         try:
             # Surrogate Id for operators and iterating index
             operator_id = 0
@@ -69,15 +102,11 @@ class Storage:
 
             # Number of nodes to be processed per batch 
             num_attributes = len(vars(graph.nodes[0])) + 2
-            num_nodes_per_batch = 20000 // num_attributes
+            num_nodes_per_batch = self._MAX_MUTATIONS // num_attributes
 
             num_nodes = len(graph.nodes)
 
-            # Inserting data into the Operators table
-
-            # Loop till all nodes are inserted
             while operator_id < num_nodes:
-                # Creating and inserting a batch
                 with self.database.batch() as batch:
                     for _ in range(num_nodes_per_batch):
                         if operator_id == num_nodes:
@@ -90,8 +119,6 @@ class Storage:
                         columns = ['model_name', 'operator_id']
                         values = [graph.model_name, operator_id + 1]
 
-                        # Adding Node attributes and their values to 
-                        # columns and values
                         attrs = vars(node)
                         for item in attrs.items():
                             if item[0] != 'label' and item[0] != 'value':
@@ -101,7 +128,6 @@ class Storage:
                         columns = tuple(columns)
                         values = tuple(values)
 
-                        # Insert
                         batch.insert(
                             table = 'Operators',
                             columns = columns,
@@ -111,18 +137,40 @@ class Storage:
             return True
         except Exception as e:
             print(e)
+
             query = "DELETE FROM Models WHERE model_name = \'" + graph.model_name + "\'"
             deleted_rows = self.database.execute_partitioned_dml(
                 query
             )
+
             return False
 
-    # Internal function to load tensor(Edge) data into Tensors table
     def _load_tensors(self, graph):
+        """Internal method to store data into the Tensors table
+
+        Stores attributes of Edge instances of given graph, representing 
+        tensors, into Tensors table. Inserts in batches due to mutation 
+        restriction in spanner.
+        Only those edges are commited to database which can be reached by 
+        traversal, assuming that unreachable edges represent weight/bias tensors
+        etc.
+        If any of the data batches raises an exception due to an unsuccesful 
+        commit, the model being inserted is deleted from the Models table and 
+        subsequently all children are deleted from Operators and Tensors table 
+        due to ON DELETE CASCADE.
+
+        Args:
+            graph (Graph object) : The intance of Graph to be stored in the 
+                Database.
+    
+        Returns:
+            A boolean, True if commit into database is succesful, False otherwise
+        """ 
         if len(graph.edges) == 0:
-            return
+            return  
 
         # Dictionary to store source nodes and destination nodes of edges
+        # Also ensures only traversable edges are pushed to database
         to_nodes = dict()
         from_nodes = dict()
 
@@ -168,15 +216,12 @@ class Storage:
 
             # Number of edges to be processed per batch
             num_attributes = len(vars(graph.edges[0])) + 4
-            num_edges_per_batch = 20000 // num_attributes
+            num_edges_per_batch = self._MAX_MUTATIONS // num_attributes
             
             edge_indices = list(to_nodes.keys())
             num_edges = len(edge_indices)
 
-            # Inserting data into the Tensors table
-            # Looping till all edges are inserted
             while tensor_id < num_edges:
-                # Creating and inserting a batch
                 with self.database.batch() as batch:
                     for _ in range(num_edges_per_batch):
                         if tensor_id == num_edges:
@@ -198,7 +243,6 @@ class Storage:
                             from_operator_ids, to_operator_ids
                             ]
 
-                        # Adding Edge attributes and their values to columns and values
                         attrs = vars(edge)
                         for item in attrs.items():
                             if item[0] != 'label' and item[0] != 'value':
@@ -208,7 +252,6 @@ class Storage:
                         columns = tuple(columns)
                         values = tuple(values)
 
-                        # Insert 
                         batch.insert(
                             table = 'Tensors',
                             columns = columns,
@@ -224,8 +267,15 @@ class Storage:
             )
             return False
 
-    # Function to load data for given Graph to Spanner Database
     def load_data(self, graph):
+        """Method to commit data into spanner database
+
+        Stores data for given graph into three tables using 3 helper internal
+        methods. Prints a log if data load fails.
+
+        Args:
+            graph (Graph object) : The intance of Graph to be stored in the Database.
+        """ 
 
         loaded = self._load_model(graph)
         if not loaded:

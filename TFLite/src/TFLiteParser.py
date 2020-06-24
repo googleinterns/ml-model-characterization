@@ -1,25 +1,29 @@
+"""Module with TFLiteParser class to parse tflite files"""
+
 import flatbuffers
 import inspect
-from tflite import BuiltinOperator
-from tflite import Model
-from common import Node
-from common import Edge
-from common import Graph
+
+
 import OpToNode
 import TensorToEdge
+from common import Edge
+from common import Graph
+from common import Node
+from tflite import BuiltinOperator
+from tflite import Model
 
-# Module wiith methods to parse a tflite file and
-# return a Graph object with populated node and edge attributes
 class TFLiteParser:
+    """Class to parse TF files
 
-    # Class instances to convert ops to nodes and tensors to edges
-    _OP_TO_NODE = OpToNode.OpToNode()
-    _TENSOR_TO_EDGE = TensorToEdge.TensorToEdge()
+    Contains parsing for SavedModel and FrozenGraph formats.
+    """
+
+    _OP_TO_NODE = OpToNode.OpToNode() # For converting operations to nodes
+    _TENSOR_TO_EDGE = TensorToEdge.TensorToEdge() # For converting tensors to edges
 
     def __init__(self):
 
-        # Dictionary for enum value to enum name mapping
-        self._builtin_optype = dict()
+        self._builtin_optype = dict() # Dict for enum value to name mapping
         for member in inspect.getmembers(
                 BuiltinOperator.BuiltinOperator):
             if not member[0].startswith('_'):
@@ -28,13 +32,37 @@ class TFLiteParser:
 
     # Reading tflite file onto Model object
     def parse(self, file_path):
+        """Method to parse tflite file into a tflite Model object
+
+        Args:
+            file_path (str) : path to the file to be parsed.
+
+        Returns:
+            tflite Model object containing the tflite model information.
+        """
+        
         with open(file_path, "rb") as file:
             model = Model.Model.GetRootAsModel(file.read(), 0)
         
         return model
 
-    # Generate Graph from Model with tensors as edges and operators as nodes
     def parse_graph(self, file_path, model_name, category):
+        """Method to parse file and Create a corresponding Graph object
+
+        Reads a tflite file into a tflite/Model Object and then extracts 
+        operators, tensors, graph structure and metadata and stores it 
+        into a Graph, Node and Edge objects. Nodes are operations and 
+        edges are tensors.
+
+        Args:
+            file_path (str): path of the file to parse
+            model_name (str): unique model name of the model being parsed.
+            category (str): problem category of the model.
+
+        Returns:
+            The Graph object created for the file.
+        """
+
         model = self.parse(file_path)
 
         nodes = list()
@@ -56,7 +84,6 @@ class TFLiteParser:
 
         for tensor_index in range(subgraph.TensorsLength()):
             tensor = subgraph.Tensors(tensor_index)
-            new_edge = Edge.Edge(label = tensor.Name(), value = tensor)
             # Converting tensor to an Edge object
             new_edge = self._TENSOR_TO_EDGE.convert(tensor)
             edges.append(new_edge)
@@ -65,7 +92,7 @@ class TFLiteParser:
         # Add proxy nodes for Input and Output of the model
 
         for input_index in range(subgraph.InputsLength()):
-            new_node = Node.Node(label = "Input_Placeholder")
+            new_node = Node.Node(label = "Input_Placeholder", operator_type = "Input_Placeholder")
             nodes.append(new_node)
             
             node_index = len(nodes) - 1
@@ -110,7 +137,7 @@ class TFLiteParser:
                 from_nodes[edge_index].append(node_index)
 
         for output_index in range(subgraph.OutputsLength()):
-            new_node = Node.Node(label = "Output_Placeholder")
+            new_node = Node.Node(label = "Output_Placeholder", operator_type = "Output_Placeholder")
             nodes.append(new_node)
             
             node_index = len(nodes) - 1
@@ -120,7 +147,7 @@ class TFLiteParser:
                 to_nodes.update({edge_index : []})
             to_nodes[edge_index].append(node_index)
 
-        # Constructing Adjacency List from to_nodes, from_nodes
+        # Constructing adjacency List from to_nodes, from_nodes
         for edge_index in range(len(edges)):
 
             if edge_index not in from_nodes or edge_index not in to_nodes:

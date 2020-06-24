@@ -1,13 +1,39 @@
+"""Module with Graph class to store models
+
+Graph class stores model graph structure and metadata,
+also contains helper functions to print graph, nodes and edges.
+
+"""
 
 from queue import Queue
 
-# Graph Module to store adjacency list and graph related attributed
-# Nodes will be a list of operators, edges a list of tensors
-# start_nodes is a list of indices referencing nodes and edges, denoting entry nodes
-# adj_list is a dictionary of the form {src node : list of ([edge, dest_node])} 
-# where src_node, edge and dest_node and indices referencing nodes and edges
 class Graph:
-    def __init__(self, nodes, start_node_indices, edges, adj_list, model_name, category):
+    """ Graph class to store model graph and metadata
+
+        Stores model graphs as an adjacency list, operators as nodes
+        and tensors as edges. Also stores metadata related to the model
+
+        Attributes:
+            nodes (list[Node objects]) : The nodes used in the graph
+            start_node_indices (list of int) : Indexes referencing to nodes which
+                are the starting nodes of the graph
+            edges (list[Edge objects]) : The edges used in the graph 
+            adj_list (dict{int : list of [int, int]}) : The adjacency list 
+                of the graph which is a dictionary storing the edges as follows,
+                {from_node_index : list[[edge_index, to_node_index]]}.
+                All indexes are referenced to nodes.
+            source (str, optional) : The file format the model is read from,
+                currently only "TF" and "TFLite" are supported.
+            category (str) : Problem category model falls under
+            model_name (str) : Name of the model.
+            num_inputs (int) : Number of inputs to the model.
+            num_outputs (int) : Number of outputs from the model.
+            max_fan_in (int) : Maximum number of incoming edges to any node.
+            max_fan_out (int) : Maximum number of outgoing edges from any node.
+    """
+
+    def __init__(self, nodes, start_node_indices, edges, adj_list, model_name,
+                    category):
         self.nodes = nodes
         self.start_node_indices = start_node_indices
         self.edges = edges
@@ -21,9 +47,17 @@ class Graph:
         self.max_fan_out = self.calc_max_fan_out()
 
     def calc_num_inputs(self):
+        """ Method to calculate num_inputs
+
+        Iterates through nodes and counts the number of nodes labelled
+        'Input_Placeholder'
+
+        Returns:
+            An integer corresponding to the number of inputs to the model
+        """
+
         ret = 0
 
-        # Number of proxy nodes for output
         for node in self.nodes:
             if node.label == 'Input_Placeholder':
                 ret += 1
@@ -31,9 +65,17 @@ class Graph:
         return ret
 
     def calc_num_outputs(self):
+        """ Method to calculate num_outputs
+
+        Iterates through nodes and counts the number of nodes labelled
+        'Output_Placeholder'
+
+        Returns:
+            An integer corresponding to the number of outputs from the model
+        """
+
         ret = 0
 
-        # Number of proxy nodes for output
         for node in self.nodes:
             if node.label == 'Output_Placeholder':
                 ret += 1
@@ -41,8 +83,17 @@ class Graph:
         return ret
 
     def calc_max_fan_out(self):
+        """ Method to calculate max_fan_out
+
+        Calculated the maximum number of outgoing edges from a node.
+
+        Returns:
+            An integer corresponding to max_fan_out
+        """
+
         ret = 0
 
+        # len(adj_list[node_index]) is out degree.
         for src_node_index in range(len(self.nodes)):
             if src_node_index in self.adj_list:
                 ret = max(ret, len(self.adj_list[src_node_index]))
@@ -50,9 +101,18 @@ class Graph:
         return ret
 
     def calc_max_fan_in(self):
+        """ Method to calculate max_fan_in
+
+        Calculated the maximum number of incoming edges to a node.
+
+        Returns:
+            An integer corresponding to max_fan_in
+        """
+
         in_degree = [0] * len(self.nodes)
         ret = 0
 
+        # calculating indegree and updating ret value
         for src_node_index in range(len(self.nodes)):
             if src_node_index in self.adj_list:
                 for (_, dest_node_index) in self.adj_list[src_node_index]:
@@ -61,8 +121,12 @@ class Graph:
  
         return ret    
 
-    # Print graph in BFS order
     def print_graph(self):
+        """ Helper Method to print graph
+
+        Prints the graph in BFS order using the node and edge labels.
+        """
+
         # List to store visit status of a node
         visited = [False] * (len(self.nodes))
         queue = Queue()
@@ -90,8 +154,14 @@ class Graph:
                         visited[dest_node_index] = True
                         queue.put(dest_node_index)
 
-    # Print nodes with attributes
     def print_nodes(self):
+        """ Helper Method to print nodes of a graph
+
+        Prints the attributes of nodes of the graph in the format,
+        attr1 : val1 attr2 : val2 ...
+        Does not print attributes whos value is None or the string 'NONE'.
+        """
+
         print("\nOperators\n")
         for node in self.nodes:
             attrs = vars(node)
@@ -102,8 +172,14 @@ class Graph:
             
             print()
 
-    # Print edges with attributes
     def print_edges(self):
+        """ Helper Method to print edges of a graph
+
+        Prints the attributes of edges of the graph in the format,
+        attr1 : val1 attr2 : val2 ...
+        Does not print attributes whos value is None or the string 'NONE'.
+        """
+
         print("\nTensors\n")
         for edge in self.edges:
             attrs = vars(edge)
@@ -114,9 +190,16 @@ class Graph:
             
             print()
 
-    # Function to get those edges which are traversed during BFS
-    # Assumption is that the tensors not reached by traversal are weights, bias etc.
     def get_traversed_edges(self):
+        """ Method to get edges which are come across during traversal
+
+        Traverses the graph in BFS order from start_node_indices and keeps
+        track of the edges visited.
+
+        Returns:
+            A list of Edge objects which are encountered during 
+            traversal of graph.
+        """
         visited = dict()
         queue = Queue()
 
