@@ -3,6 +3,9 @@
 Contains functions to load model data into database or run inference 
 and print it.
 
+Attributes:
+    MODELS_DIR (str) : Directory in which module will look for --filename
+
 CLA to module and Args to all functions in module:
     filename (str): name of the file to be parsed. Must be present in 
         models directory.
@@ -17,8 +20,10 @@ CLA to module and Args to all functions in module:
 
 import argparse
 
-import TFParser
 from common import Storage
+import TFParser
+
+MODELS_DIR = "./TF/models/"
 
 def load_data(filename, model_name, category, is_saved_model, input_operation_names):
     """Function to parse TF file and load data into spanner database
@@ -28,8 +33,11 @@ def load_data(filename, model_name, category, is_saved_model, input_operation_na
     """
 
     tf_parser = TFParser.TFParser()
-    graph = tf_parser.parse_graph("./TF/models/" + filename, model_name, 
+    graph = tf_parser.parse_graph(MODELS_DIR + filename, model_name, 
                 category, is_saved_model, input_operation_names)
+
+    if graph == None:
+        print("Parsing failed, model not loaded")
 
     # Constants for spanner DB details
     INSTANCE_ID = 'ml-models-characterization-db'
@@ -45,8 +53,12 @@ def run_inference(filename, model_name, category, is_saved_model, input_operatio
     metadata, graph structure, nodes and edges
     """
     tflite_parser = TFParser.TFParser()
-    graph = tflite_parser.parse_graph("./TF/models/" + filename, model_name, 
+    graph = tflite_parser.parse_graph(MODELS_DIR + filename, model_name, 
                 category, is_saved_model, input_operation_names)
+
+    if graph == None:
+        print("Parsing failed, cannot run inference")
+        return
 
     print("Name of model:", graph.model_name)
     print("Number of inputs:", graph.num_inputs)

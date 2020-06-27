@@ -4,11 +4,10 @@ from queue import Queue
 import tensorflow as tf
 import tensorflow_text
 
-import TensorToEdge
-import OpToNode
 from common import Graph
-
 from common import Node
+import OpToNode
+import TensorToEdge
 
 class TFParser:
     """Class to parse TF files
@@ -79,6 +78,10 @@ class TFParser:
 
             # Loop to populate to_nodes and from_nodes
             for operation in graph.get_operations():
+
+                if operation.node_def.op == "StatefulPartitionedCall":
+                    print("Graphs with operation 'StatefulPartitionedCall' are not supported for parsing")
+                    return None
 
                 if operation.node_def.op == "Const":
                     continue
@@ -169,7 +172,6 @@ class TFParser:
             # Calculate cumulative sum of visited and remove all unvisited nodes
             # After summing, value stored in current index of visited will tell 
             # how many nodes have been deleted with index <= current index
-
             new_nodes = list()
             for index in range(len(nodes)):
                 if visited[index] == 0:

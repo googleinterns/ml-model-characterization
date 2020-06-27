@@ -63,7 +63,7 @@ class OpToNode:
             node.filter_height = list(attr['ksize'].list.i)[h_index]
             node.filter_width = list(attr['ksize'].list.i)[w_index]
 
-        elif op == "FusedBatchNorm":
+        elif op == "FusedBatchNorm" or op == "FusedBatchNormV2" or op == "FusedBatchNormV3":
             node.is_training = attr['is_training'].b
 
         elif op == "CudnnRNN":
@@ -74,7 +74,8 @@ class OpToNode:
 
         elif op == "ConcatV2":
             axis_tensor = operation.inputs[len(operation.inputs) - 1]
-            node.axis = int(tf.get_static_value(axis_tensor))
+            if tf.get_static_value(axis_tensor) != None:
+                node.axis = int(tf.get_static_value(axis_tensor))
 
         elif op == "Cast":
             node.in_data_type = str(attr['SrcT'])[9:-1]

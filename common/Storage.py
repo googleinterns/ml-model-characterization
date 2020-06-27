@@ -1,8 +1,8 @@
 """Module with Storage class to store Graph object into a spanner database"""
 
-import os
 from google.cloud import spanner
 from queue import Queue
+import os
 
 class Storage:
     """ Storage class to store graph into spanner database
@@ -72,8 +72,6 @@ class Storage:
             print(e)
             return False 
 
-            
-
     def _load_operators(self, graph):
         """Internal method to store data into the Operators table
 
@@ -101,6 +99,8 @@ class Storage:
                 return
 
             # Number of nodes to be processed per batch 
+            # 2 additional attributes, 'model_name' and 'operator_id',
+            # present in db other than the class attributes
             num_attributes = len(vars(graph.nodes[0])) + 2
             num_nodes_per_batch = self._MAX_MUTATIONS // num_attributes
 
@@ -116,22 +116,22 @@ class Storage:
 
                         # To store the database column names and their values 
                         # to be inserted
-                        columns = ['model_name', 'operator_id']
+                        column_names = ['model_name', 'operator_id']
                         values = [graph.model_name, operator_id + 1]
 
                         attrs = vars(node)
                         for item in attrs.items():
                             if item[0] != 'label' and item[0] != 'value':
-                                columns.append(item[0])
+                                column_names.append(item[0])
                                 values.append(item[1])
 
-                        columns = tuple(columns)
+                        column_names = tuple(column_names)
                         values = tuple(values)
 
                         batch.insert(
                             table = 'Operators',
-                            columns = columns,
-                            values=  [values]
+                            columns = column_names,
+                            values =  [values]
                         )
                         operator_id += 1
             return True
@@ -215,6 +215,9 @@ class Storage:
             tensor_id = 0
 
             # Number of edges to be processed per batch
+            # 4 additional attributes, 'model_name', 'tensor_id', 
+            # 'from_operator_ids' and 'to_operator_ids', present in db other 
+            # than the class attributes.
             num_attributes = len(vars(graph.edges[0])) + 4
             num_edges_per_batch = self._MAX_MUTATIONS // num_attributes
             
@@ -234,7 +237,7 @@ class Storage:
 
                         # To store the database column names and their 
                         # values to be inserted
-                        columns = [
+                        column_names = [
                             'model_name', 'tensor_id', 
                             'from_operator_ids', 'to_operator_ids'
                             ]
@@ -246,15 +249,15 @@ class Storage:
                         attrs = vars(edge)
                         for item in attrs.items():
                             if item[0] != 'label' and item[0] != 'value':
-                                columns.append(item[0])
+                                column_names.append(item[0])
                                 values.append(item[1])
 
-                        columns = tuple(columns)
+                        column_names = tuple(column_names)
                         values = tuple(values)
 
                         batch.insert(
                             table = 'Tensors',
-                            columns = columns,
+                            columns = column_names,
                             values = [values]
                         )
                         tensor_id += 1
@@ -291,3 +294,5 @@ class Storage:
         if not loaded:
             print('Data Loading Failed in _load_tensors')
             return 
+
+        print("Model", graph.model_name, "succesfuly loaded into database")

@@ -3,14 +3,13 @@
 import flatbuffers
 import inspect
 
-
-import OpToNode
-import TensorToEdge
 from common import Edge
 from common import Graph
 from common import Node
 from tflite import BuiltinOperator
 from tflite import Model
+import OpToNode
+import TensorToEdge
 
 class TFLiteParser:
     """Class to parse TF files
@@ -90,7 +89,6 @@ class TFLiteParser:
         
         # Populating to_nodes, from_nodes
         # Add proxy nodes for Input and Output of the model
-
         for input_index in range(subgraph.InputsLength()):
             new_node = Node.Node(label = "Input_Placeholder", operator_type = "Input_Placeholder")
             nodes.append(new_node)
@@ -120,8 +118,7 @@ class TFLiteParser:
 
             nodes.append(new_node)
             node_index = len(nodes) - 1
-
-            
+ 
             for input_index in range(operator.InputsLength()):
                 edge_index = operator.Inputs(input_index)
                 if edge_index not in to_nodes:

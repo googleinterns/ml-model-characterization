@@ -25,6 +25,13 @@ bazel-bin/tflite_main --filename mnasnet_1.3_224_ImageClassification.tflite --mo
 bazel-bin/tflite_main --filename mobilenet_v1_1.0_224_ImageClassification.tflite --model_name mobilenet_v1_1.0_224 --category ImageClassification
 bazel-bin/tflite_main --filename nasnet_large_ImageClassification.tflite --model_name nasnet_large --category ImageClassification
 bazel-bin/tflite_main --filename MobileNet-V3_ImageClassification.tflite --model_name MobileNet-V3 --category ImageClassification
+bazel-bin/tflite_main --filename lite-model_spice_1_AudioPitchExtraction.tflite --model_name lite-model_spice_1 --category AudioPitchExtraction
+bazel-bin/tflite_main --filename lite-model_deeplabv3-xception65-cityscapes_1_default_1_ImageSegmentation.tflite --model_name lite-model_deeplabv3-xception65-cityscapes_1_default_1 --category ImageSegmentation
+bazel-bin/tflite_main --filename lite-model_deeplabv3-mobilenetv3-cityscapes_1_default_1_ImageSegmentation.tflite --model_name lite-model_deeplabv3-mobilenetv3-cityscapes_1_default_1 --category ImageSegmentation
+bazel-bin/tflite_main --filename lite-model_deeplabv3-mobilenetv2_1_default_1_ImageSegmentation.tflite --model_name lite-model_deeplabv3-mobilenetv2_1_default_1 --category ImageSegmentation
+bazel-bin/tflite_main --filename ssdlite_mobiledet_dsp_320x320_coco_2020_05_19_ObjectDetection.tflite --model_name ssdlite_mobiledet_dsp_320x320_coco_2020_05_19 --category ObjectDetection
+bazel-bin/tflite_main --filename ssd_mobilenet_v3_small_coco_2020_01_14_ObjectDetection.tflite --model_name ssd_mobilenet_v3_small_coco_2020_01_14 --category ObjectDetection
+bazel-bin/tflite_main --filename ssd_mobilenet_v3_large_coco_2020_01_14_ObjectDetection.tflite --model_name ssd_mobilenet_v3_large_coco_2020_01_14 --category ObjectDetection
 
 bazel build tf_main
 bazel-bin/tf_main --filename efficientnet_b5_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b5_feature-vector_1 --category ImageFeatureVector 
@@ -53,3 +60,23 @@ bazel-bin/tf_main --filename efficientnet_b6_feature-vector_1_ImageFeatureVector
 bazel-bin/tf_main --filename efficientnet_b7_feature-vector_1_ImageFeatureVector_SavedModel.pb --model_name efficientnet_b7_feature-vector_1 --category ImageFeatureVector 
 bazel-bin/tf_main --filename speech_embedding_1_AudioEmbedding_SavedModel.pb --model_name speech_embedding_1 --category AudioEmbedding 
 bazel-bin/tf_main --filename compare_gan_model_15_cifar10_resnet_cifar_1_ImageGenerator_SavedModel.pb --model_name compare_gan_model_15_cifar10_resnet_cifar_1 --category ImageGenerator 
+bazel-bin/tf_main --filename zfnet512_ImageClassification_FrozenGraph.pb --model_name zfnet512 --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename yolov2-voc_ObjectDetection_FrozenGraph.pb --model_name yolov2-voc --category ObjectDetection --is_saved_model False
+bazel-bin/tf_main --filename vgg19_ImageClassification_FrozenGraph.pb --model_name vgg19 --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename tinyyolov2_ObjectDetection_FrozenGraph.pb --model_name tinyyolov2 --category ObjectDetection --is_saved_model False
+bazel-bin/tf_main --filename super-resolution_ImageSuperResolution_FrozenGraph.pb --model_name super-resolution --category ImageSuperResolution --is_saved_model False
+bazel-bin/tf_main --filename shufflenet-v2_ImageClassification_FrozenGraph.pb --model_name shufflenet-v2 --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename shufflenet_ImageClassification_FrozenGraph.pb --model_name shufflenet --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename retinanet_ObjectDetection_FrozenGraph.pb --model_name retinanet --category ObjectDetection --is_saved_model False
+bazel-bin/tf_main --filename ResNet101-DUC_ImageSegmentation_FrozenGraph.pb --model_name ResNet101-DUC --category ImageSegmentation --is_saved_model False
+bazel-bin/tf_main --filename rcnn-ilsvrc13_ImageClassification_FrozenGraph.pb --model_name rcnn-ilsvrc13 --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename mnist_ImageClassification_FrozenGraph.pb --model_name mnist --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename googlenet_ImageClassification_FrozenGraph.pb --model_name googlenet --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename fast_neural_style_transfer_ImageStyleTransfer_FrozenGraph.pb --model_name fast_neural_style_transfer --category ImageStyleTransfer --is_saved_model False
+bazel-bin/tf_main --filename emotion-ferplus_EmotionRecognition_FrozenGraph.pb --model_name emotion-ferplus --category EmotionRecognition --is_saved_model False
+bazel-bin/tf_main --filename caffenet_ImageClassification_FrozenGraph.pb --model_name caffenet --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename bvlcalexnet_ImageClassification_FrozenGraph.pb --model_name bvlcalexnet --category ImageClassification --is_saved_model False
+bazel-bin/tf_main --filename context_rcnn_resnet101_snapshot_serengeti_2020_06_10_ObjectDetection_FrozenGraph.pb --model_name context_rcnn_resnet101_snapshot_serengeti_2020_06_10 --category ObjectDetection --is_saved_model False
+bazel-bin/tf_main --filename rfcn_resnet101_coco_2018_01_28_ObjectDetection_FrozenGraph.pb --model_name rfcn_resnet101_coco_2018_01_28 --category ObjectDetection --is_saved_model False
+bazel-bin/tf_main --filename mask_rcnn_resnet50_atrous_coco_2018_01_28_ObjectDetection_FrozenGraph.pb --model_name mask_rcnn_resnet50_atrous_coco_2018_01_28 --category ObjectDetection --is_saved_model False
+bazel-bin/tf_main --filename mask_rcnn_inception_v2_coco_2018_01_28_ObjectDetection_FrozenGraph.pb --model_name mask_rcnn_inception_v2_coco_2018_01_28 --category ObjectDetection --is_saved_model False

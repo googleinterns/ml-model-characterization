@@ -31,4 +31,3 @@ class TensorToEdge:
         if tensor.shape:
             new_edge.tensor_shape = tensor.get_shape().as_list()
         return new_edge
-

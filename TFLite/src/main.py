@@ -3,6 +3,9 @@
 Contains functions to load model data into database or run inference 
 and print it.
 
+Attributes:
+    MODELS_DIR (str) : Directory in which module will look for --filename
+
 CLA to module and Args to all functions in module:
     filename (str): name of the file to be parsed. Must be present in 
         models directory.
@@ -13,8 +16,10 @@ CLA to module and Args to all functions in module:
 import argparse
 import os
 
-import TFLiteParser
 from common import Storage
+import TFLiteParser
+
+MODELS_DIR = "./TFLite/models/"
 
 def load_data(filename, model_name, category):
     """Function to parse TFLite file and load data into spanner database
@@ -24,7 +29,7 @@ def load_data(filename, model_name, category):
     """
 
     tflite_parser = TFLiteParser.TFLiteParser()
-    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, 
+    graph = tflite_parser.parse_graph(MODELS_DIR + filename, 
                 model_name, category)
 
     # Constants for spanner DB details
@@ -40,7 +45,7 @@ def run_inference(filename, model_name, category):
     Parses a TFLite file and prints the metadata, graph structure, nodes and edges
     """
     tflite_parser = TFLiteParser.TFLiteParser()
-    graph = tflite_parser.parse_graph("./TFLite/models/" + filename, 
+    graph = tflite_parser.parse_graph(MODELS_DIR + filename, 
                 model_name, category)
 
     print("Name of model:", graph.model_name)
@@ -63,6 +68,6 @@ if __name__ == "__main__":
     model_name = args.model_name
     category = args.category
 
-    # load_data(filename, model_name, category)
+    load_data(filename, model_name, category)
 
-    run_inference(filename, model_name, category)
+    # run_inference(filename, model_name, category)

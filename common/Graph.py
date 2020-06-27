@@ -200,6 +200,7 @@ class Graph:
             A list of Edge objects which are encountered during 
             traversal of graph.
         """
+        
         visited = dict()
         queue = Queue()
 
