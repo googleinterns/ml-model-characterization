@@ -54,4 +54,4 @@ CREATE TABLE Tensors (
   from_operator_ids ARRAY<INT64>,
   to_operator_ids ARRAY<INT64>,
 ) PRIMARY KEY(model_name, tensor_id),
-  INTERLEAVE IN PARENT Models ON DELETE CASCADE
+  INTERLEAVE IN PARENT Models ON DELETE CASCADE;

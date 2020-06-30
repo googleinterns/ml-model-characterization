@@ -45,6 +45,9 @@ class Storage:
             A boolean, True if commit into database is succesful, False otherwise
         """ 
 
+        # Graph attributes that are not pushed to the database
+        NOT_STORED_ATTR = ['nodes', 'start_node_indices', 'edges', 'adj_list'] 
+
         try:
             # To store the database column names and their values to be inserted
             columns = list()
@@ -91,6 +94,9 @@ class Storage:
             A boolean, True if commit into database is succesful, False otherwise
         """ 
 
+        # Node attributes that are not pushed to the database
+        NOT_STORED_ATTR = ['label', 'value'] 
+
         try:
             # Surrogate Id for operators and iterating index
             operator_id = 0
@@ -98,14 +104,19 @@ class Storage:
             if len(graph.nodes) == 0:
                 return
 
-            # Number of nodes to be processed per batch 
+            # Number of mutations per row is the number of attributes being 
+            # pushed to database
             # 2 additional attributes, 'model_name' and 'operator_id',
             # present in db other than the class attributes
             num_attributes = len(vars(graph.nodes[0])) + 2
+
+            # Number of nodes to be processed per batch i.e.
+            # floor(max mutations per batch / number of mutations per row)
             num_nodes_per_batch = self._MAX_MUTATIONS // num_attributes
 
             num_nodes = len(graph.nodes)
 
+            # TO-DO : Add retry logic if a batch fails
             while operator_id < num_nodes:
                 with self.database.batch() as batch:
                     for _ in range(num_nodes_per_batch):
@@ -210,20 +221,28 @@ class Storage:
                             vis[dest_node_index] = True
                             queue.put(dest_node_index)
 
+        # Edge attributes that are not pushed to the database
+        NOT_STORED_ATTR = ['label', 'value'] 
+
         try:
             # Surrogate Id for tensors
             tensor_id = 0
 
-            # Number of edges to be processed per batch
+            # Number of mutations per row is the number of attributes being 
+            # pushed to database.
             # 4 additional attributes, 'model_name', 'tensor_id', 
             # 'from_operator_ids' and 'to_operator_ids', present in db other 
             # than the class attributes.
             num_attributes = len(vars(graph.edges[0])) + 4
+
+            # Number of nodes to be processed per batch i.e.
+            # floor(max mutations per batch / number of mutations per row)
             num_edges_per_batch = self._MAX_MUTATIONS // num_attributes
             
             edge_indices = list(to_nodes.keys())
             num_edges = len(edge_indices)
 
+            # TO-DO : Add retry logic if a batch fails
             while tensor_id < num_edges:
                 with self.database.batch() as batch:
                     for _ in range(num_edges_per_batch):

@@ -63,7 +63,8 @@ class OpToNode:
             node.filter_height = list(attr['ksize'].list.i)[h_index]
             node.filter_width = list(attr['ksize'].list.i)[w_index]
 
-        elif op == "FusedBatchNorm" or op == "FusedBatchNormV2" or op == "FusedBatchNormV3":
+        elif (op == "FusedBatchNorm" or op == "FusedBatchNormV2" or 
+                op == "FusedBatchNormV3"):
             node.is_training = attr['is_training'].b
 
         elif op == "CudnnRNN":
@@ -95,6 +96,7 @@ class OpToNode:
         Returns:
             The created Node object instance representing the operation.
         """
+        
         node = Node.Node(label = operation.name, 
                             operator_type = operation.node_def.op ,value = None)
 

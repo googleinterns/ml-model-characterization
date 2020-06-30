@@ -1,5 +1,4 @@
--- Percentage of Conv2D layers per model
-
+-- Percentage of Conv2D layers per model (TF + TFLite)
 SELECT Models.model_name, COUNT(operator_type) AS num_conv2d_layers
 FROM Models JOIN Operators
 ON Models.model_name = Operators.model_name
@@ -7,7 +6,7 @@ WHERE operator_type = "Conv2D"
 GROUP BY model_name
 ORDER BY num_conv2d_layers DESC;
 
--- Operator Distribution per problem category
+-- Operator Distribution per problem category (TF + TFLite)
 SELECT category, operator_type, COUNT(operator_id) as count
 FROM Models JOIN Operators
 ON Models.model_name = Operators.model_name
@@ -23,7 +22,7 @@ ON Models.model_name = Operators.model_name
 GROUP BY model_name, activation_function
 ORDER BY model_name, count DESC;
 
--- Padding types used per operator per model
+-- Padding types used per operator per model (TF + TFLite)
 SELECT Models.model_name, operator_type, padding, COUNT(operator_id) as count
 FROM Models JOIN Operators
 ON Models.model_name = Operators.model_name
