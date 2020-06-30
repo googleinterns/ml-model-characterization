@@ -34,6 +34,6 @@ ORDER BY model_name, count DESC;
 SELECT operator_type, COUNT(operator_id) as count
 FROM Operators
 WHERE operator_type 
-IN ("Relu", "Relu6", "Sigmoid", "Elu","Exp", "Selu", "Softplus", "Softsign", "Tanh")
+IN ("Relu", "Relu6", "Sigmoid", "Elu","Exp", "Selu", "Softplus", "Softsign", "Tanh", "LeakyRelu")
 GROUP BY operator_type
 ORDER BY count DESC;

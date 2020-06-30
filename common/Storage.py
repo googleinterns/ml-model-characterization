@@ -31,7 +31,7 @@ class Storage:
         self.instance = self.spanner_client.instance(instance_id)
         self.database = self.instance.database(database_id)
 
-    def _load_model(self, graph):
+    def _load_model(self, graph, is_canonical):
         """Internal method to store data into the Models table
 
         Stores Graph instance attributes pertaining to model metadata into 
@@ -40,6 +40,10 @@ class Storage:
         Args:
             graph (Graph object) : The intance of Graph to be stores in 
                 the Database.
+            is_canonical (str) : Boolean to separate unique architectures 
+                from duplicates, The first model to be inserted into database
+                with a specific architecture will have this to be "True", the other
+                models with same architecture will have this to be "False". 
     
         Returns:
             A boolean, True if commit into database is succesful, False otherwise
@@ -50,8 +54,8 @@ class Storage:
 
         try:
             # To store the database column names and their values to be inserted
-            columns = list()
-            values = list()
+            columns = ['is_canonical']
+            values = [is_canonical]
 
             attrs = vars(graph)
             for item in attrs.items():
@@ -93,6 +97,8 @@ class Storage:
         Returns:
             A boolean, True if commit into database is succesful, False otherwise
         """ 
+        if len(graph.nodes) == 0:
+            return True
 
         # Node attributes that are not pushed to the database
         NOT_STORED_ATTR = ['label', 'value'] 
@@ -178,7 +184,7 @@ class Storage:
             A boolean, True if commit into database is succesful, False otherwise
         """ 
         if len(graph.edges) == 0:
-            return  
+            return True
 
         # Dictionary to store source nodes and destination nodes of edges
         # Also ensures only traversable edges are pushed to database
@@ -289,7 +295,7 @@ class Storage:
             )
             return False
 
-    def load_data(self, graph):
+    def load_data(self, graph, is_canonical):
         """Method to commit data into spanner database
 
         Stores data for given graph into three tables using 3 helper internal
@@ -297,9 +303,13 @@ class Storage:
 
         Args:
             graph (Graph object) : The intance of Graph to be stored in the Database.
+            is_canonical (str) : Boolean to separate unique architectures 
+                from duplicates, The first model to be inserted into database
+                with a specific architecture will have this to be "True", the other
+                models with same architecture will have this to be "False". 
         """ 
 
-        loaded = self._load_model(graph)
+        loaded = self._load_model(graph, is_canonical)
         if not loaded:
             print('Data Loading Failed in _load_model')
             return 

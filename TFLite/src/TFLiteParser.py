@@ -45,7 +45,7 @@ class TFLiteParser:
         
         return model
 
-    def parse_graph(self, file_path, model_name, category):
+    def parse_graph(self, file_path, model_name, category, sub_category):
         """Method to parse file and Create a corresponding Graph object
 
         Reads a tflite file into a tflite/Model Object and then extracts 
@@ -57,6 +57,7 @@ class TFLiteParser:
             file_path (str): path of the file to parse
             model_name (str): unique model name of the model being parsed.
             category (str): problem category of the model.
+            sub_category (str) : problem sub category of the model.
 
         Returns:
             The Graph object created for the file.
@@ -157,6 +158,7 @@ class TFLiteParser:
 
                     adj_list[node1_index].append([edge_index, node2_index])
             
-        graph = Graph.Graph(nodes, start_node_indices, edges, adj_list, model_name, category)
+        graph = Graph.Graph(nodes, start_node_indices, edges, adj_list, 
+                            model_name, category, sub_category)
         graph.source = "TFLite"
         return graph             
