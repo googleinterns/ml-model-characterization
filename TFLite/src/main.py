@@ -12,7 +12,7 @@ CLA to module and common args to all functions in module:
     model_name (str) : unique model name of the model being parsed.
     category (str) : problem category of the model.
     sub_category (str) : problem sub category of the model.
-    is_canonical (str) : Boolean to separate unique architectures 
+    is_canonical (str) : String to separate unique architectures 
             from duplicates, The first model to be inserted into database
             with a specific architecture will have this to be "True", the other
             models with same architecture will have this to be "False", 

@@ -40,7 +40,7 @@ class Storage:
         Args:
             graph (Graph object) : The intance of Graph to be stores in 
                 the Database.
-            is_canonical (str) : Boolean to separate unique architectures 
+            is_canonical (str) : String to separate unique architectures 
                 from duplicates, The first model to be inserted into database
                 with a specific architecture will have this to be "True", the other
                 models with same architecture will have this to be "False". 
@@ -303,7 +303,7 @@ class Storage:
 
         Args:
             graph (Graph object) : The intance of Graph to be stored in the Database.
-            is_canonical (str) : Boolean to separate unique architectures 
+            is_canonical (str) : String to separate unique architectures 
                 from duplicates, The first model to be inserted into database
                 with a specific architecture will have this to be "True", the other
                 models with same architecture will have this to be "False". 

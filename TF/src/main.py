@@ -16,7 +16,7 @@ CLA to module and common args to all functions in module:
         defaults to "True".
     input_operation_names (list of str, optional) : Names of the operations 
         that are inputs to the model, defaults to [].
-    is_canonical (str) : Boolean to separate unique architectures 
+    is_canonical (str) : String to separate unique architectures 
             from duplicates, The first model to be inserted into database
             with a specific architecture will have this to be "True", the other
             models with same architecture will have this to be "False", 

@@ -126,6 +126,7 @@ class TFParser:
                             nodes.pop(index)
                             
                     new_graph = Graph.Graph(nodes, [], [], {}, model_name, category, sub_category)
+                    new_graph.source = "TF"
 
                     return new_graph
 
