@@ -1,14 +1,54 @@
-import tflite
-from tflite import *
-import inspect
-from common import Node
+"""Module with OpToNode class to create Node objects for operators"""
 
-# Module to convert an Operator to Node
-# Extracts attributes from operator and populates Node attributes
-# For checking for support on different options, refer to
-# https://www.tensorflow.org/lite/guide/ops_compatibility#unsupported_operations
+import inspect
+
+from common import Node
+from tflite import *
 
 class OpToNode:
+    """Class to convert operation to Node object"""
+
+    _OP_TFLITE_TO_TF = {
+        "ADD" : "Add", "AddN" : "ADD_N", "DIV" : "Div", "SUB" : "Sub",
+        "AVERAGE_POOL_2D" : "AveragePool", "SpaceToBatchND" : "SPACE_TO_BATCH_ND",
+        "BATCH_TO_SPACE_ND" : "BatchToSpaceND", "CONCATENATION" : "Concat", 
+        "CONV_2D" : "Conv2D", "DEPTHWISE_CONV_2D" : "DepthwiseConv2dNative",
+        "DEQUANTIZE" : "Dequantize", "GATHER" : "Gather", 
+        "GATHER_ND" : "GatherNd", "L2_NORMALIZATION" : "L2_NORMALIZATION", 
+        "L2_POOL_2D" : "L2_POOL_2D", "LOCAL_RESPONSE_NORMALIZATION" : "LRN", 
+        "MAX_POOL_2D" : "MaxPool", "MUL" : "Mul",  "PAD" : "Pad",
+        "PADV2" : "PadV2", "RESHAPE" : "Reshape", "SOFTMAX" : "Softmax",
+        "SPACE_TO_DEPTH" : "SpaceToDepth", "DEPTH_TO_SPACE" : "DepthToSpace",
+        "TRANSPOSE" : "Transpose", "MEAN" : "Mean", "SUM" : "Sum",
+        "REDUCE_PROD" : "Prod", "REDUCE_MAX" : "Max", "REDUCE_MIN" : "Min",
+        "REDUCE_ANY" : "Any", "RESIZE_BILINEAR" : "ResizeBilinear",
+        "RESIZE_NEAREST_NEIGHBOR" : "ResizeNearestNeighbor", "SQUEEZE" : "Squeeze",
+        "SPLIT" : "Split", "SPLIT_V" : "SplitV", "STRIDED_SLICE" : "StridedSlice",
+        "TOPK_V2" : "TopKV2", "CAST" : "Cast", "ARG_MAX" : "ArgMax", 
+        "ARG_MIN" : "ArgMin", "TILE" : "Tile", "EXPAND_DIMS" : "ExpandDims",
+        "TRANSPOSE_CONV" : "Conv2DBackpropInput", 
+        "SPARSE_TO_DENSE" : "SparseToDense", "SHAPE" : "Shape",
+        "PACK" : "Pack", "ONE_HOT" : "OneHot", "UNPACK" : "Unpack",
+        "LEAKY_RELU" : "LeakyRelu", "SQUARED_DIFFERENCE" : "SquaredDifference",
+        "MIRROR_PAD" : "MirrorPad", "UNIQUE" : "Unique", "WHERE" : "Where",
+        "REVERSE_SEQUENCE" : "ReverseSequence", "MATRIX_DIAG" : "MatrixDiag",
+        "MATRIX_SET_DIAG" : "MatrixSetDiag", "FLOOR" : "Floor", "CEIL" : "Ceil",
+        "ELU" : "Elu", "ROUND" : "Round", "RELU" : "Relu", "RELU6" : "Relu6",
+        "LOGISTIC" : "Sigmoid", "TANH" : "Tanh", "EXP" : "Exp", "COS" : "Cos",
+        "LOG_SOFTMAX" : "LogSoftmax", "MAXIMUM" : "Maximum", "MINIMUM" : "Minimum",
+        "GREATER" : "Greater", "GREATER_EQUAL" : "GreaterEqual", "LESS" : "Less",
+        "LESS_EQUAL" : "LessEqual", "EQUAL" : "Equal", "NOT_EQUAL" : "NotEqual",
+        "NEG" : "Neg", "SELECT" : "Select", "SLICE" : "Slice", "POW" : "Pow",
+        "LOGICAL_OR" : "LogicalOr", "LOGICAL_AND" : "LogicalAnd",
+        "LOGICAL_NOT" : "LogicalNot", "FLOOR_DIV" : "FloorDiv", 
+        "FLOOR_MOD" : "FloorMod", "RANGE" : "Range", "SIN" : "Sin", 
+        "LOG" : "Log", "SQRT" : "Sqrt", "RSQRT" : "Rsqrt", "SQUARE" : "Square",
+        "ZEROS_LIKE" : "ZerosLike", "ABS" : "Abs", "HARD_SWISH" : "HardSwish",
+        "FILL" : "Fill", "REVERSE_V2" : "ReverseV2", "RANK" : "Rank",
+        "SEGMENT_SUM" : "SegmentSum", "SCATTER_ND" : "ScatterNd"
+    } # Mapping from TFLite to TF operations,
+    # contains only those ops which have a one-one mapping
+
 
     def __init__(self):
 
@@ -54,13 +94,39 @@ class OpToNode:
     # Function to fill dictionary with inverse 
     # enum mappings of class 'class_type'
     def _fill_dict(self, class_type, val_to_name):
+        """ Internal method to fill dictionary
+
+        Fills dictionary with inverse enum mappings from value to name
+        
+        Args:
+            class_type (tflite/* Object) : The class for which inverse enum 
+                mapping is done.
+            val_to_name (dict of int to str) : The dictionary to fill.
+
+        """
         for member in inspect.getmembers(class_type):
             if not member[0].startswith('_'):
                 if not inspect.ismethod(member[1]):
                     val_to_name[member[1]] = member[0]
 
-    # Internal methods to cast BuiltinOptions at runtime and extract options,
-    # Dummy methods exist for Options with no attributes for future improvements.
+    """ Internal methods to cast BuiltinOptions at runtime and extract options
+
+    Internal methods ending with '_options' cast the BuiltinOptions of operator
+    at runtime and extracts the relevant options and adds them as attribute 
+    values to node.
+    Dummy methods exist for future improvements.
+    For semantic information on Node attributes for TFLite,
+    https://www.tensorflow.org/lite/guide/ops_compatibility#unsupported_operations
+
+
+    Args:
+        operator (tflite/Operator object) :  Operator that the node represents
+        node (Node object) : The Node object to add attribute values to.
+
+    Returns:
+        The modified Node object with added attribute values.
+    
+    """
     def _none_options(self, operator, node):
         return node
         
@@ -670,24 +736,39 @@ class OpToNode:
         return node
   
     def convert(self, operator, opname):
+        """Function to create Node object representing given operator
 
-        node = Node.Node(label = opname, value = operator)
+        Creates a new Node object to represent the given operator.
 
-        # List of internal mathods of class i.e. names starting with '_'
+        Args:
+            operator (tflite/Operator object) : The operator to create 
+                a node for.
+            opname (str) : Name of the operator.
+
+        Returns:
+            The created Node object instance representing the operator
+        """
+
+        node = Node.Node(label = opname, operator_type = opname, 
+                            value = operator)
+
+        # List of internal methods of class for casting BuiltinOptions
         methods = list()
         for method in inspect.getmembers(OpToNode, predicate = inspect.isroutine):
             if method[0].endswith('_options'):
                 methods.append(method)
 
-        methods.sort(key = lambda mem : mem[1].__code__.co_firstlineno)
-
         # methods with the name *_options sorted in accordance 
         # with enum value for efficient calling
+        methods.sort(key = lambda mem : mem[1].__code__.co_firstlineno)
+
         node_options = list()
         for method in methods:
             node_options.append(method[1])
 
         type_val = operator.BuiltinOptionsType()
         node = node_options[type_val](self, operator, node)
+        if node.operator_type in self._OP_TFLITE_TO_TF:
+            node.operator_type = self._OP_TFLITE_TO_TF[node.operator_type]
 
         return node
