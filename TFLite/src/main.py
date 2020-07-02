@@ -1,9 +1,14 @@
 import TFLiteParser
 import os
+from common import Storage
+import argparse
+
+import timeit
 
 # Function to calculate duplication statistics op operators i.e.
-# number of unique tensors and operators accross models 
-def get_duplication(tflite_parser):
+# number of unique tensors and operators accross files in models directory
+def get_duplication():
+    tflite_parser = TFLiteParser.TFLiteParser()
     node_vis = dict()
     edge_vis = dict()
 
@@ -14,7 +19,7 @@ def get_duplication(tflite_parser):
     duplicated_edges = 0
 
     for file in os.listdir("models/"):
-        graph = tflite_parser.parse_graph("models/" + file)
+        graph = tflite_parser.parse_graph("models/" + file, None, None)
 
         # Calculating number of of total nodes and duplicated nodes in each graph
         total_nodes += len(graph.nodes)
@@ -36,17 +41,24 @@ def get_duplication(tflite_parser):
             else:
                 duplicated_edges += 1
 
+    print("Duplication stats")
     print("Total nodes:", total_nodes, "Duplicated nodes:", duplicated_nodes)
-    print("Total edges:", total_edges, "Duplicated edges:", duplicated_edges)
+    print("Total traversed edges:", total_edges, "Duplicated traversed edges:", duplicated_edges)
+    print()
 
-if __name__ == "__main__":
-
+# Function to load data in models/filename to spanner DB
+def load_data(filename, model_name, category):
     tflite_parser = TFLiteParser.TFLiteParser()
+    graph = tflite_parser.parse_graph("models/" + filename, model_name, category)
+    storage = Storage.Storage('ml-models-characterization-db', 'models_db')
+    storage.load_data(graph)
 
-    get_duplication(tflite_parser)
+# Run inference on models/filename and print graph, operators and tensors
+def run_inference(filename, model_name = None, category = None):
+    tflite_parser = TFLiteParser.TFLiteParser()
+    graph = tflite_parser.parse_graph("./models/" + filename, model_name, category)
 
-    graph = tflite_parser.parse_graph("models/smartreply.tflite")
-
+    print("Name of model:", graph.model_name)
     print("Number of inputs:", graph.num_inputs)
     print("Number of outputs:", graph.num_outputs)
     print("Max fan-in:", graph.max_fan_in)
@@ -54,3 +66,24 @@ if __name__ == "__main__":
     graph.print_graph()
     graph.print_nodes()
     graph.print_edges()
+
+if __name__ == "__main__":
+    # filename and model_name are arguments to the command line
+    # filename must be present in the models directory
+    # modelname must be unique for every model added to the database
+    # category is the category of problem the model solves ex. Object Detection
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename')
+    parser.add_argument('model_name')
+    parser.add_argument('category') 
+    args = parser.parse_args()
+
+    filename = args.filename
+    model_name = args.model_name
+    category = args.category
+
+    # load_data(filename, model_name, category)
+
+    # get_duplication()
+
+    run_inference(filename, model_name, category)
