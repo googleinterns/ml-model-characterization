@@ -54,23 +54,22 @@ class Storage:
 
         try:
             # To store the database column names and their values to be inserted
-            columns = ['is_canonical']
+            column_names = ['is_canonical']
             values = [is_canonical]
 
             attrs = vars(graph)
             for item in attrs.items():
-                if (item[0] != 'nodes' and item[0] != 'start_node_indices' 
-                    and item[0] != 'edges' and item[0] != 'adj_list'):
-                    columns.append(item[0])
+                if (item[0] not in NOT_STORED_ATTR):
+                    column_names.append(item[0])
                     values.append(item[1])
 
-            columns = tuple(columns)
+            column_names = tuple(column_names)
             values = tuple(values)
 
             with self.database.batch() as batch:
                 batch.insert(
                     table = 'Models',
-                    columns = columns,
+                    columns = column_names,
                     values = [values]
                 )
 
@@ -138,7 +137,7 @@ class Storage:
 
                         attrs = vars(node)
                         for item in attrs.items():
-                            if item[0] != 'label' and item[0] != 'value':
+                            if item[0] not in NOT_STORED_ATTR:
                                 column_names.append(item[0])
                                 values.append(item[1])
 
@@ -273,7 +272,7 @@ class Storage:
 
                         attrs = vars(edge)
                         for item in attrs.items():
-                            if item[0] != 'label' and item[0] != 'value':
+                            if item[0] not in NOT_STORED_ATTR:
                                 column_names.append(item[0])
                                 values.append(item[1])
 

@@ -39,8 +39,6 @@ os.system('bazel-bin/tflite_init')
 os.system('bazel build tflite_main')
 
 for file_name in os.listdir(TFLITE_MODELS_DIR):
-    # print(file_name)
-
     # Extracting command options from filename
     file_name = file_name[:-7]
     file_info = file_name.rsplit("_", 1)
@@ -68,8 +66,6 @@ for file_name in os.listdir(TFLITE_MODELS_DIR):
 os.system('bazel build tf_main')
 
 for file_name in os.listdir(TF_MODELS_DIR):
-    # print(file_name)
-
     # Extracting command options from filename
     file_name = file_name[:-3]
     file_info = file_name.rsplit("_", 2)

@@ -185,6 +185,10 @@ class TFParser:
 
                         adj_list[node1_index].append([edge_index, node2_index])
 
+            if len(start_node_indices) == 0:
+                print("Graph contains no input placeholders, cannot parse graph.")
+                return None
+
             # List of nodes contains nodes that are never visited by a traversal.
             # Assuming these are weights and biases,
             # following code discards them and also calculates output nodes
