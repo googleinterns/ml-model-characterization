@@ -160,5 +160,9 @@ class TFLiteParser:
             
         graph = Graph.Graph(nodes, start_node_indices, edges, adj_list, 
                             model_name, category, sub_category)
+
+        # Removing nodes which are not reachable from input
+        graph.process_nodes()
         graph.source = "TFLite"
+        
         return graph             

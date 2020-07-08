@@ -111,9 +111,9 @@ class Storage:
 
             # Number of mutations per row is the number of attributes being 
             # pushed to database
-            # 2 additional attributes, 'model_name' and 'operator_id',
-            # present in db other than the class attributes
-            num_attributes = len(vars(graph.nodes[0])) + 2
+            # 3 additional attributes, 'model_name' and 'operator_id', 
+            # 'is_input' present in db other than the class attributes
+            num_attributes = len(vars(graph.nodes[0])) + 3
 
             # Number of nodes to be processed per batch i.e.
             # floor(max mutations per batch / number of mutations per row)
@@ -128,12 +128,17 @@ class Storage:
                         if operator_id == num_nodes:
                             break
 
+                        # Boolean to denote if operator is input
+                        is_input = False
+                        if operator_id in graph.start_node_indices:
+                            is_input = True
+
                         node = graph.nodes[operator_id]
 
                         # To store the database column names and their values 
                         # to be inserted
-                        column_names = ['model_name', 'operator_id']
-                        values = [graph.model_name, operator_id + 1]
+                        column_names = ['model_name', 'operator_id', 'is_input']
+                        values = [graph.model_name, operator_id + 1, is_input]
 
                         attrs = vars(node)
                         for item in attrs.items():

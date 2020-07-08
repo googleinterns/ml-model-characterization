@@ -45,6 +45,7 @@ def load_data(filename, model_name, category, sub_category,
 
     if graph == None:
         print("Parsing failed, model not loaded")
+        return
 
     # Constants for spanner DB details
     INSTANCE_ID = 'ml-models-characterization-db'

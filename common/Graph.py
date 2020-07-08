@@ -50,6 +50,114 @@ class Graph:
         self.max_fan_in = self.calc_max_fan_in()
         self.max_fan_out = self.calc_max_fan_out()
 
+    def process_nodes(self):
+        """ Function to delete nodes not traversable from start
+
+        Function to traverse the graph from inputs and delete the ones
+        that are not visited.
+        Nodes with certain labels are discarded from output.
+        Assumption is that nodes that are not reachable from input are
+        not of semantic use.
+        """
+
+        NOT_OUTPUT = [
+        "Assert", "Unpack", "Placeholder", "StridedSlice", "Less", 
+        "StopGradient", "Exit", "ExpandDims", "Shape", "Merge",
+        "ApplyAdam", "AssignSub", "BiasAddGrad", "Conv2DBackpropFilter"
+        ] # List of operations which cannot be output nodes
+        # Tentative list based on graph analysis of models.
+
+        adj_list = self.adj_list
+        nodes = self.nodes
+        start_node_indices = self.start_node_indices
+
+        # List to store visit status of node, 0 is visited and 1 otherwise
+        visited = [1] * len(nodes)
+
+        queue = Queue()
+
+        # For each start node, if not already visited, start a new traversal
+        for node_index in start_node_indices:
+            queue.put(node_index)
+            visited[node_index] = 0
+            # BFS
+            while not queue.empty():
+                src_node_index = queue.get()
+
+                # If no outgoing edges, assign label as output
+                if src_node_index not in adj_list:
+                    op_type = nodes[src_node_index].operator_type
+                    if ("VariableOp" not in op_type 
+                        and op_type not in NOT_OUTPUT):
+                        # print(op_type, operation.name)
+                        nodes[src_node_index].label = "Output_Placeholder"
+                    continue
+                
+                for [edge_index, dest_node_index] in adj_list[src_node_index]:
+                    if visited[dest_node_index] == 1:
+                        visited[dest_node_index] = 0
+                        queue.put(dest_node_index)
+
+        # Calculate cumulative sum of visited and remove all unvisited nodes
+        # After summing, value stored in current index of visited will tell 
+        # how many nodes have been deleted with index <= current index
+        new_nodes = list()
+        for index in range(len(nodes)):
+            if visited[index] == 0:
+                new_nodes.append(nodes[index])
+            if index != 0:
+                visited[index] += visited[index - 1]
+
+        nodes = new_nodes
+        del new_nodes
+
+        # Creating a new adjacency list since node indices have been updated
+        # Using visited, new index of a node will be old index - visited[old index]
+        new_adj_list = dict()
+        for item in adj_list.items():
+            src_node_index = item[0]
+
+            if src_node_index == 0 and visited[src_node_index] == 1:
+                continue
+
+            if visited[src_node_index] - visited[src_node_index - 1] == 1:
+                continue
+
+            new_src_node_index = (src_node_index 
+                                - visited[src_node_index])
+
+            new_adj_list.update({new_src_node_index : []})
+            for [edge_index, dest_node_index] in item[1]:
+                
+                if dest_node_index == 0 and visited[dest_node_index] == 1:
+                    continue
+
+                if visited[dest_node_index] - visited[dest_node_index - 1] == 1:
+                    continue
+
+                new_dest_node_index = (dest_node_index -
+                                        visited[dest_node_index])
+                
+                new_adj_list[new_src_node_index].append(
+                    [edge_index, new_dest_node_index])
+
+        for index in range(len(start_node_indices)):
+            start_node_indices[index] -= visited[start_node_indices[index]]
+
+        adj_list = new_adj_list
+        del new_adj_list
+
+        # Updating nodes, adj_list and start_node_indices
+        self.nodes = nodes
+        self.adj_list = adj_list
+        self.start_node_indices = start_node_indices
+
+        # Recalculating graph attributes
+        self.max_fan_in = self.calc_max_fan_in()
+        self.max_fan_out = self.calc_max_fan_out()
+        self.num_inputs = self.calc_num_inputs()
+        self.num_outputs = self.calc_num_outputs()
+
     def calc_num_inputs(self):
         """ Method to calculate num_inputs
 
