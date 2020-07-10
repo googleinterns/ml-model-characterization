@@ -1,13 +1,25 @@
+""" module to obtain Graph embeddings and cosine similarity database models
+
+CLA to module:
+    include_edge_attrs (str) : case insensitive string to denote whether to 
+        include edge attributes of input edge from _EDGE_ATTRS in feature,
+        if "true" then they are included.
+    include_node_attrs (str) : case insensitive string to denote whether to 
+        include node attributes from _NODE_ATTRS in feature, if "true" then 
+        they are included.
+"""
+
 from google.cloud import spanner
 from karateclub import Graph2Vec
-from sklearn import metrics
 from sklearn import cluster
+from sklearn import metrics
+import argparse
 import networkx
 import numpy
 
+import Edge
 import Graph
 import Node
-import Edge
 
 class Vectorize:
     """ Embedding class to create graph embeddings
@@ -22,8 +34,15 @@ class Vectorize:
             required spanner instance.
         database (cloud spanner Database object): Instance to access the
             database from where the models will be retrieved
-
     """
+
+    _EDGE_ATTRS = [
+        "tensor_shape", "tensor_type"
+        ] # Input edge attributes to be used as features
+
+    _NODE_ATTRS = [
+        "operator_type"
+        ] # Node attributes to be used as features
 
     def __init__(self, instance_id, database_id):
         self.spanner_client = spanner.Client()
@@ -158,7 +177,8 @@ class Vectorize:
 
         return model_graphs
 
-    def _graph_to_networkx_graph(self, graph):
+    def _graph_to_networkx_graph(self, graph, include_edge_attrs, 
+                                    include_node_attrs):
         """ Converting Graph object to networkx graph
 
         Also adds a dummy node which is connected to all inputs
@@ -166,34 +186,60 @@ class Vectorize:
 
         Arguments:
             graph (Graph object) : Graph object to be converted to networkx
+            include_edge_attrs (str) : case insensitive string to denote 
+                whether to include edge attributes of input edge from 
+                _EDGE_ATTRS in feature, if "true" then they are included.
+            include_node_attrs (str) : case insensitive string to denote 
+                whether to include node attributes from _NODE_ATTRS in feature,
+                if "true" then they are included.
 
         Returns:
             networkx graph corresponding to the converted Graph object        
         """
 
+        # Initializing networkx graph
         networkx_graph = networkx.Graph(
             model_name = graph.model_name, category = graph.category,
             sub_category = graph.sub_category, source = graph.source
             )
 
-        # Adding all nodes to the graph
-        for index in range(len(graph.nodes)):
-            networkx_graph.add_node(
-                index, feature = [graph.nodes[index].operator_type])
+        input_edges = dict()
 
         # Adding edges to the graph
         for src_node_index in graph.adj_list.keys():
             for [edge_index, dest_node_index] in graph.adj_list[src_node_index]:
-                # print(src_node_index, dest_node_index)
                 networkx_graph.add_edge(
                     src_node_index, dest_node_index,
                     tensor_shape = graph.edges[edge_index].tensor_shape,
                     tensor_type = graph.edges[edge_index].tensor_type)
+                
+                if dest_node_index not in input_edges:
+                    input_edges.update({dest_node_index : []})
+            
+                input_edges[dest_node_index].append(graph.edges[edge_index])
+        
+        # Adding all nodes to the graph, and building features
+        for index in range(len(graph.nodes)):
+            features = list()
+
+            if include_node_attrs.lower() == "true":
+                for node_attr in self._NODE_ATTRS:
+                    features.append(str(getattr(graph.nodes[index], node_attr)))
+
+            if include_edge_attrs.lower() == "true" and index in input_edges:
+                for input_edge in input_edges[index]:
+                    for edge_attr in self._EDGE_ATTRS:
+                        features.append(str(getattr(input_edge, edge_attr)))
+
+            concat_feature = " ".join(features)
+
+            networkx_graph.add_node(
+                index, feature = concat_feature)
 
         # If graph is not connected, introduce a dummy node and connect all 
         # inputs to it to make it connected.
         if not networkx.algorithms.is_connected(networkx_graph):
-            max_node_num = max(networkx_graph.nodes)
+            max_node_num = max(networkx_graph.nodes())
 
             networkx_graph.add_node(max_node_num + 1, feature = "Dummy")
 
@@ -202,48 +248,88 @@ class Vectorize:
 
         return networkx_graph
 
-    def get_graph2vec_embeddings(self):
+    def get_graph2vec_embeddings(self, include_edge_attrs = False, 
+                                    include_node_attrs = True):
         """ Getting embeddings using graph2vec
 
         Parses models from DB into Graph objects, converts them into networkx
         graphs and uses graph2vec for getting embeddings for them.
+        Prints the top 20 models closest to every model using cosine similarity.
+
+        Arguments:
+            include_edge_attrs (str) : case insensitive string to denote 
+                whether to include edge attributes of input edge from 
+                _EDGE_ATTRS in feature, if "true" then they are included.
+            include_node_attrs (str) : case insensitive string to denote
+                whether to include node attributes from _NODE_ATTRS in feature,
+                if "true" then they are included.
 
         Returns:
             list of Graph objects corresponding to models in the database and
-            a list of embeddings for the same.  
+            a list of embeddings for the same with index correspondence.
         """
-        
+
+        # Parameters to graph2vec
+        WL_ITERATIONS = 7
+        ATTRIBUTED = True
+        EPOCHS = 250
+        LEARNING_RATE = 0.025
+        MIN_COUNT = 1
+
+        # Building list of networkx graphs to fir graph2vec
         model_graphs = self._parse_models()
         networkx_graphs = list()
-        for model_graph in model_graphs:
-            networkx_graphs.append(self._graph_to_networkx_graph(model_graph))
-        
-        # Fitting models to graph2vec
-        model = Graph2Vec(attributed = True, epochs = 100, 
-                            learning_rate = 0.05, min_count = 1)
-        model.fit(networkx_graphs)
 
+        for model_graph in model_graphs:
+            networkx_graphs.append(
+                self._graph_to_networkx_graph(
+                    model_graph, include_edge_attrs, include_node_attrs
+                    )
+                )
+
+        # Fitting models to graph2vec
+        graph2vec = Graph2Vec(
+            wl_iterations = WL_ITERATIONS, attributed = ATTRIBUTED, 
+            epochs = EPOCHS, learning_rate = LEARNING_RATE, 
+            min_count = MIN_COUNT
+            )
+        
+        graph2vec.fit(networkx_graphs)
+ 
         # Computing pairwise cosine similarity
-        embeddings = model.get_embedding()
+        embeddings = graph2vec.get_embedding()
         similarity = metrics.pairwise.cosine_similarity(embeddings)
 
+        # Prints atmost top TOP_K similar models and similarity value for each 
+        # model
+        TOP_K = 20
 
-        # Prints atmost top 10 similar models and similarity value for each model
-        for index1, model_graph1 in enumerate(model_graphs):            
-            print(model_graph1.model_name)
-            indices = numpy.argsort(-similarity[index1])
+        for index, model_graph in enumerate(model_graphs):            
+            print(model_graph.model_name)
+            indices = numpy.argsort(-similarity[index])
 
             num_models = len(model_graphs)
 
-            for rank in range(1,min(21, num_models)):
+            for rank in range(1,min(TOP_K + 1, num_models)):
                 print("\t", end = '')
-                print(similarity[index1][indices[rank]],
+                print(similarity[index][indices[rank]],
                         model_graphs[indices[rank]].model_name)
 
         return model_graphs, embeddings
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--include_edge_attrs', default = "True")
+    parser.add_argument('--include_node_attrs', default = "False")
+    args = parser.parse_args()
+
+    include_edge_attrs = args.include_edge_attrs
+    include_node_attrs = args.include_node_attrs
+
+    # Instance and database ID of spanner database which holds the models
     INSTANCE_ID = 'ml-models-characterization-db'
     DATABASE_ID = 'models_db'
+
     vectorize = Vectorize(INSTANCE_ID, DATABASE_ID)
-    model_graphs, embeddings = vectorize.get_graph2vec_embeddings()
+    model_graphs, embeddings = vectorize.get_graph2vec_embeddings(
+        include_edge_attrs, include_node_attrs)

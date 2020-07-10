@@ -61,7 +61,7 @@ py_binary(
 
 # TFLite
 filegroup(
-    name = "tflitefiles",
+    name = 'tflitefiles',
     srcs = glob(['TFLite/src/tflite/*.py'])
 )
 
@@ -90,7 +90,7 @@ py_library(
 )
 
 py_binary(
-    name = "tflite_init",
+    name = 'tflite_init',
     srcs = ['TFLite/src/init.py'],
     main = 'TFLite/src/init.py',
 )
@@ -98,7 +98,14 @@ py_binary(
 py_binary(
     name = 'tflite_main',
     srcs = ['TFLite/src/main.py'],
-    deps = [':TFLiteParser', ":Storage"],
+    deps = [':TFLiteParser', ':Storage'],
     imports = ['./common'],
     main = 'TFLite/src/main.py',
+)
+
+py_binary(
+    name = 'vectorize',
+    srcs = ['common/Vectorize.py'],
+    deps = [':Graph', ':Node', ':Edge'],
+    main = 'common/Vectorize.py',
 )
