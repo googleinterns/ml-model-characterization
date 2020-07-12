@@ -1,21 +1,8 @@
-""" module to obtain Graph embeddings and cosine similarity database models
-
-CLA to module:
-    include_edge_attrs (str) : case insensitive string to denote whether to 
-        include edge attributes of input edge from _EDGE_ATTRS in feature,
-        if "true" then they are included.
-    include_node_attrs (str) : case insensitive string to denote whether to 
-        include node attributes from _NODE_ATTRS in feature, if "true" then 
-        they are included.
-"""
+""" module to obtain Graph embeddings of models in the database"""
 
 from google.cloud import spanner
 from karateclub import Graph2Vec
-from sklearn import cluster
-from sklearn import metrics
-import argparse
 import networkx
-import numpy
 
 import Edge
 import Graph
@@ -293,43 +280,7 @@ class Vectorize:
             epochs = EPOCHS, learning_rate = LEARNING_RATE, 
             min_count = MIN_COUNT
             )
-        
         graph2vec.fit(networkx_graphs)
- 
-        # Computing pairwise cosine similarity
+        
         embeddings = graph2vec.get_embedding()
-        similarity = metrics.pairwise.cosine_similarity(embeddings)
-
-        # Prints atmost top TOP_K similar models and similarity value for each 
-        # model
-        TOP_K = 20
-
-        for index, model_graph in enumerate(model_graphs):            
-            print(model_graph.model_name)
-            indices = numpy.argsort(-similarity[index])
-
-            num_models = len(model_graphs)
-
-            for rank in range(1,min(TOP_K + 1, num_models)):
-                print("\t", end = '')
-                print(similarity[index][indices[rank]],
-                        model_graphs[indices[rank]].model_name)
-
         return model_graphs, embeddings
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--include_edge_attrs', default = "True")
-    parser.add_argument('--include_node_attrs', default = "False")
-    args = parser.parse_args()
-
-    include_edge_attrs = args.include_edge_attrs
-    include_node_attrs = args.include_node_attrs
-
-    # Instance and database ID of spanner database which holds the models
-    INSTANCE_ID = 'ml-models-characterization-db'
-    DATABASE_ID = 'models_db'
-
-    vectorize = Vectorize(INSTANCE_ID, DATABASE_ID)
-    model_graphs, embeddings = vectorize.get_graph2vec_embeddings(
-        include_edge_attrs, include_node_attrs)

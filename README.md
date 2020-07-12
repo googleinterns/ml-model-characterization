@@ -1,10 +1,10 @@
 # ML Model Characterization
-This repository contains code for parsing TF and TFLite models into a graph structure and loading layer information and tensor information into a database for querying.
+This repository contains code for parsing TF and TFLite models into a graph structure and loading layer information and tensor information into a database for querying.<br>
 Also contains code to generate graph embeddings for further structural learning on the models in the database.
 
 ## TF Models (.pb files)
 
-Enter the following commands to run inference or data loading.
+Enter the following commands to run inference or data loading. <br>
 To switch between inference and data loading, uncomment the respective function from _TF/src/main.py_.
 
 - `bazel build tf_main`  
@@ -19,7 +19,7 @@ To switch between inference and data loading, uncomment the respective function 
 
 
 ## TFLite Models (.tflite files)
-Enter the following commands to run inference or data loading.
+Enter the following commands to run inference or data loading.<br>
 To switch between inference and data loading, uncomment the respective function from _TFLite/src/main.py_.
 
 - `bazel build tflite_init` 
@@ -33,7 +33,7 @@ To switch between inference and data loading, uncomment the respective function 
 	- \-\-is_canonical [is_canonical] (optional) : "True" if the model is canonical i.e. the first of its architecture, else "False", defaults to "False".
 
 ## Loading Data to DB from scratch
-Download the data folder from [Google drive](https://drive.google.com/drive/folders/1i6aUbCB0XTEsYXlyxMGpXEv6ydmukzQF?usp=sharing).
+Download the data folder from [Google drive](https://drive.google.com/drive/folders/1i6aUbCB0XTEsYXlyxMGpXEv6ydmukzQF?usp=sharing).<br>
 The file _load_data.py_ loads models from _models_ directory in _TF/_ and _TFLite/_ with a specific value for _is_canonical_ in the database, hence the data loading will be done in two phases.
 ### Canonical Models
 - Copy the models in **canonical_[file_type].zip** to _[file_type]/models_ directory.
@@ -43,11 +43,12 @@ The file _load_data.py_ loads models from _models_ directory in _TF/_ and _TFLit
 - Set the _IS_CANONICAL_ constant in _load_data,py_ to "False" and run the command `python3 load_data.py`
 
 ## Graph Embeddings
-To run graph2vec for graph embeddings and printing the _TOP_K_ (defaults to 20) models most similar to every model, run the following commands.
-To change the number of models being printed, change _TOP_K_ value in _common/Vectorize.py_.
+To run graph2vec for graph embeddings and printing the _TOPK_ (defaults to 20) models most similar to every model or module, run the following commands. <br>
+To change the number of models being printed, change _TOPK_ value in _common/similarity.py_. <br>
+To switch between printing for model and modules, uncomment the respective function in _common/similarity.py_. <br>
 
-- `bazel build vectorize`
-- `bazel-bin/vectorize`, this takes the following CLAs,
+- `bazel build similarity`
+- `bazel-bin/similarity`, this takes the following CLAs,
 	- \-\-include_edge_attrs [include_edge_attrs] (optional) : "True" if edge attributes are to be included in feature building, else "False", defaults to "False".
 	- \-\-include_node_attrs [include_node_attrs] (optional) : "False" if node attributes are to be included in feature building, else "False", defaults to "True".
 

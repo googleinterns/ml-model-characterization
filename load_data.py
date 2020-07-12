@@ -55,6 +55,8 @@ for file_name in os.listdir(TFLITE_MODELS_DIR):
         category = "Video"
     elif sub_category.startswith("Audio") or sub_category in AUDIO_SUB_CATEGORIES:
         category = "Audio"
+    else:
+        category = "None"
 
     os.system(
         'bazel-bin/tflite_main --filename ' + file_name + '.tflite'
@@ -86,6 +88,8 @@ for file_name in os.listdir(TF_MODELS_DIR):
         category = "Video"
     elif sub_category.startswith("Audio") or sub_category in AUDIO_SUB_CATEGORIES:
         category = "Audio"
+    else:
+        category = "None"
 
     os.system(
         'bazel-bin/tf_main --filename ' + file_name + '.pb'

@@ -23,6 +23,12 @@ py_library(
 )
 
 py_library(
+    name = 'Vectorize',
+    srcs = ['common/Vectorize.py'],
+    deps = [':Graph', ':Edge', ':Node']
+)
+
+py_library(
     name = 'Storage',
     srcs = ['common/Storage.py'],
     deps = [':Graph'],
@@ -104,8 +110,7 @@ py_binary(
 )
 
 py_binary(
-    name = 'vectorize',
-    srcs = ['common/Vectorize.py'],
-    deps = [':Graph', ':Node', ':Edge'],
-    main = 'common/Vectorize.py',
+    name = 'similarity',
+    srcs = ['common/similarity.py'],
+    deps = [':Vectorize'],
 )
