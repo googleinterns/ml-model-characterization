@@ -66,8 +66,8 @@ def print_module_similarity(model_graphs, embeddings, topk):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--include_edge_attrs', default = "True")
-    parser.add_argument('--include_node_attrs', default = "False")
+    parser.add_argument('--include_edge_attrs', default = "False")
+    parser.add_argument('--include_node_attrs', default = "True")
     args = parser.parse_args()
 
     include_edge_attrs = args.include_edge_attrs
@@ -85,5 +85,5 @@ if __name__ == "__main__":
     # Number of top similar models to print
     TOPK = 20
 
-    # print_topk_similarity(model_graphs, embeddings, TOPK)
+    print_topk_similarity(model_graphs, embeddings, TOPK)
     print_module_similarity(model_graphs, embeddings, TOPK)

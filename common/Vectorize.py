@@ -3,6 +3,7 @@
 from google.cloud import spanner
 from karateclub import Graph2Vec
 import networkx
+import time
 
 import Edge
 import Graph
@@ -256,17 +257,34 @@ class Vectorize:
             a list of embeddings for the same with index correspondence.
         """
 
-        # Parameters to graph2vec
-        WL_ITERATIONS = 7
-        ATTRIBUTED = True
-        EPOCHS = 250
-        LEARNING_RATE = 0.025
-        MIN_COUNT = 1
+        """ Parameters to Graph2Vec
 
-        # Building list of networkx graphs to fir graph2vec
+        WL_ITERATIONS (int) : Depth of rooted sub-graph extracted as feature at
+            every node.
+            Higher values extract more detailed graph structures.
+        ATTRIBUTED (bool) : Boolean to denote whether to use 'feature' 
+            attribute of node for feature building or use 
+            default (degree of node).
+        EPOCHS (int) : Number of epochs to train for.
+        LEARNING_RATE (int) : Learning rate for training.
+        MIN_COUNT (int) : minimum count of feature occurence for it to be 
+            considered in vocabulary.
+        DIMENSIONS (int) : Dimension of the embeddings that are obtained.
+        WORKERS (int) : Number of cores.
+        """      
+
+        WL_ITERATIONS = 3
+        ATTRIBUTED = True
+        EPOCHS = 500
+        LEARNING_RATE = 0.15
+        MIN_COUNT = 5
+        DIMENSIONS = 128
+        WORKERS = 8
+
+        # Building list of networkx graphs to fit graph2vec
+        start_time = time.time()
         model_graphs = self._parse_models()
         networkx_graphs = list()
-
         for model_graph in model_graphs:
             networkx_graphs.append(
                 self._graph_to_networkx_graph(
@@ -274,13 +292,16 @@ class Vectorize:
                     )
                 )
 
+        print("Time to query and store models: %s" % (time.time() - start_time))
+        start_time = time.time()
         # Fitting models to graph2vec
         graph2vec = Graph2Vec(
             wl_iterations = WL_ITERATIONS, attributed = ATTRIBUTED, 
             epochs = EPOCHS, learning_rate = LEARNING_RATE, 
-            min_count = MIN_COUNT
+            min_count = MIN_COUNT, dimensions = DIMENSIONS, workers = WORKERS
             )
         graph2vec.fit(networkx_graphs)
+        print("Time to fit graphs to graph2vec model: %s" % (time.time() - start_time))
         
         embeddings = graph2vec.get_embedding()
         return model_graphs, embeddings
