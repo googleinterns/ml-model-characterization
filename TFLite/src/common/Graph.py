@@ -7,15 +7,17 @@ from queue import Queue
 # adj_list is a dictionary of the form {src node : list of ([edge, dest_node])} 
 # where src_node, edge and dest_node and indices referencing nodes and edges
 class Graph:
-    def __init__(self, nodes, start_node_indices, edges, adj_list):
+    def __init__(self, nodes, start_node_indices, edges, adj_list, model_name, category):
         self.nodes = nodes
         self.start_node_indices = start_node_indices
         self.edges = edges
         self.adj_list = adj_list
+        self.category = category
+        self.model_name = model_name
         self.num_inputs = len(self.start_node_indices)
         self.num_outputs = self.calc_num_outputs()
-        self.max_fan_out = self.calc_max_fanout()
-        self.max_fan_in = self.calc_max_fanin()
+        self.max_fan_in = self.calc_max_fan_in()
+        self.max_fan_out = self.calc_max_fan_out()
 
     def calc_num_outputs(self):
         ret = 0
@@ -27,7 +29,7 @@ class Graph:
 
         return ret
 
-    def calc_max_fanout(self):
+    def calc_max_fan_out(self):
         ret = 0
 
         for src_node_index in range(len(self.nodes)):
@@ -36,7 +38,7 @@ class Graph:
 
         return ret
 
-    def calc_max_fanin(self):
+    def calc_max_fan_in(self):
         in_degree = [0] * len(self.nodes)
         ret = 0
 
@@ -63,14 +65,14 @@ class Graph:
             
             # BFS
             while not queue.empty():
-                source_node_index = queue.get()
+                src_node_index = queue.get()
 
-                if source_node_index not in self.adj_list:
+                if src_node_index not in self.adj_list:
                     continue
 
-                for [edge_index, dest_node_index] in self.adj_list[source_node_index]:
+                for [edge_index, dest_node_index] in self.adj_list[src_node_index]:
                     print(
-                        self.nodes[source_node_index].label, 
+                        self.nodes[src_node_index].label, 
                         self.edges[edge_index].label, 
                         self.nodes[dest_node_index].label,
                     )

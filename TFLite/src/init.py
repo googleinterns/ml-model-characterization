@@ -1,12 +1,7 @@
 import os
 
 #function to compile schema.fbs with flatc and generate code files
-def init_tflite_files():
-
-    # Absolute path to schema.fbs and the path to store the generated code
-    schema_path = '/home/shobhitbehl/ml-model-characterization/TFLite/schema.fbs'
-    out_path = '/home/shobhitbehl/ml-model-characterization/TFLite/src/'
-
+def init_tflite_files(schema_path, out_path):
     print("Creating tflite files")
 
     # Compiling schema.fbs into python code
@@ -27,4 +22,9 @@ def init_tflite_files():
     )
 
 if __name__ == "__main__":
-    init_tflite_files()
+
+    # Path to schema and path where the directory should be generated
+    schema_path = "./schema.fbs"
+    out_path = "./src/"
+
+    init_tflite_files(schema_path, out_path)

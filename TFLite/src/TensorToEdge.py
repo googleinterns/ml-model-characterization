@@ -19,11 +19,11 @@ class TensorToEdge:
 
         # Creating edge and extracting features
         new_edge = Edge.Edge(label = tensor.Name(), value = tensor)
-        new_edge.type = self._tensor_type[tensor.Type()]
+        new_edge.tensor_type = self._tensor_type[tensor.Type()]
 
         shape = list()
         for i in range(tensor.ShapeLength()):
             shape.append(tensor.Shape(i))
-        new_edge.shape = shape
+        new_edge.tensor_shape = shape
 
         return new_edge
