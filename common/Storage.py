@@ -4,9 +4,9 @@ from google.cloud import spanner
 from queue import Queue
 import os
 
-import Edge
-import Graph
-import Node
+from common import Edge
+from common import Graph
+from common import Node
 
 class Storage:
     """ Storage class to store graph into spanner database

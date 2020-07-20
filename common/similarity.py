@@ -19,8 +19,8 @@ from sklearn import metrics
 import argparse
 import numpy
 
-import Storage
-import Vectorize
+from common import Storage
+from common import Vectorize
 
 def topk_similarity(model_graphs, embeddings, topk):
     """ Function to print topk similar models to each model

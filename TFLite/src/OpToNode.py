@@ -3,7 +3,7 @@
 import inspect
 
 from common import Node
-from tflite import *
+from TFLite.src.tflite import *
 
 class OpToNode:
     """Class to convert operation to Node object"""

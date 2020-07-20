@@ -27,7 +27,7 @@ CLA to module and common args to all functions in module:
 import argparse
 
 from common import Storage
-import TFParser
+from TF.src import TFParser
 
 MODELS_DIR = "./TF/models/"
 
@@ -80,8 +80,8 @@ def run_inference(filename, model_name, category, sub_category,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--filename')
-    parser.add_argument('--model_name')
+    parser.add_argument('--filename', required = True)
+    parser.add_argument('--model_name', required = True)
     parser.add_argument('--category', default = "None") 
     parser.add_argument('--sub_category', default = "None") 
     parser.add_argument('--is_saved_model', default = "True")

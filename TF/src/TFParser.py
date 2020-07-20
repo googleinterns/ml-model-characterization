@@ -6,8 +6,8 @@ import tensorflow_text
 
 from common import Graph
 from common import Node
-import OpToNode
-import TensorToEdge
+from TF.src import OpToNode
+from TF.src import TensorToEdge
 
 class TFParser:
     """Class to parse TF files

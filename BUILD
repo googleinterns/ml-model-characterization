@@ -25,7 +25,6 @@ py_library(
 py_library(
     name = 'Vectorize',
     srcs = ['common/Vectorize.py'],
-    deps = [':Graph', ':Edge', ':Node']
 )
 
 py_library(
@@ -46,22 +45,18 @@ py_library(
     name = 'TFTensorToEdge',
     srcs = ['TF/src/TensorToEdge.py'],
     deps = [':Edge'],
-    imports = ['common/'],
-
 )
 
 py_library(
     name = 'TFParser',
     srcs = ['TF/src/TFParser.py'], 
     deps = [':Node', ':Edge', ':Graph', ':TFOpToNode', ':TFTensorToEdge'],
-    imports = ['common/'],
 )
 
 py_binary(
     name = 'tf_main',
     srcs = ['TF/src/main.py'],
     deps = [':TFParser', ':Storage'],
-    imports = ['common/'],
     main = 'TF/src/main.py',
 )
 
@@ -75,7 +70,6 @@ py_library(
     name = 'TFLiteOpToNode',
     srcs = ['TFLite/src/OpToNode.py'],
     deps = [':Node'],
-    imports = ['./common'],
     data = [':tflitefiles'],
 )
 
@@ -83,7 +77,6 @@ py_library(
     name = 'TFLiteTensorToEdge',
     srcs = ['TFLite/src/TensorToEdge.py'],
     deps = [':Edge'],
-    imports = ['./common'],
     data = [':tflitefiles'],
 )
 
@@ -91,7 +84,6 @@ py_library(
     name = 'TFLiteParser',
     srcs = ['TFLite/src/TFLiteParser.py'], 
     deps = [':Node', ':Edge', ':Graph', ':TFLiteOpToNode', ':TFLiteTensorToEdge'],
-    imports = ['./common'],
     data = [':tflitefiles'],
 )
 
@@ -105,12 +97,18 @@ py_binary(
     name = 'tflite_main',
     srcs = ['TFLite/src/main.py'],
     deps = [':TFLiteParser', ':Storage'],
-    imports = ['./common'],
     main = 'TFLite/src/main.py',
 )
 
 py_binary(
     name = 'similarity',
     srcs = ['common/similarity.py'],
-    deps = [':Vectorize'],
+    deps = [':Storage', ':Vectorize'],
+)
+
+py_binary(
+    name = 'compare',
+    srcs = ['common/compare.py'],
+    deps = [':Storage', ':Vectorize', ':TFParser', ':TFLiteParser'],
+    imports = ['./TFLite/src/']
 )

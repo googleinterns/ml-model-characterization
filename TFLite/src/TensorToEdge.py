@@ -3,7 +3,7 @@
 import inspect
 
 from common import Edge
-from tflite import TensorType
+from TFLite.src.tflite import TensorType
 
 class TensorToEdge:
     """Class to convert tensor to Edge object"""
