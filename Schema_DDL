@@ -1,11 +1,13 @@
 CREATE TABLE Models (
   model_name STRING(1024) NOT NULL,
   category STRING(1024),
-  source STRING(1024),
   num_inputs INT64,
   num_outputs INT64,
   max_fan_in INT64,
   max_fan_out INT64,
+  source STRING(1024),
+  sub_category STRING(1024),
+  is_canonical STRING(1024),
 ) PRIMARY KEY(model_name);
 
 CREATE TABLE Operators (

@@ -24,7 +24,10 @@ class Graph:
                 All indexes are referenced to nodes.
             source (str, optional) : The file format the model is read from,
                 currently only "TF" and "TFLite" are supported.
-            category (str) : Problem category model falls under
+            category (str) : Problem category model falls under, i.e. 
+                Text, Image etc.
+            sub_category (str) : Problem sub category the model falls under i.e.
+                ImageClassification, TextEmbedding etc.
             model_name (str) : Name of the model.
             num_inputs (int) : Number of inputs to the model.
             num_outputs (int) : Number of outputs from the model.
@@ -33,13 +36,14 @@ class Graph:
     """
 
     def __init__(self, nodes, start_node_indices, edges, adj_list, model_name,
-                    category):
+                    category, sub_category):
         self.nodes = nodes
         self.start_node_indices = start_node_indices
         self.edges = edges
         self.adj_list = adj_list
         self.source = None
         self.category = category
+        self.sub_category = sub_category
         self.model_name = model_name
         self.num_inputs = self.calc_num_inputs()
         self.num_outputs = self.calc_num_outputs()
