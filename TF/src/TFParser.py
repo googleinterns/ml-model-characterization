@@ -20,7 +20,7 @@ class TFParser:
 
     _NOT_OUTPUT = [
         "Assert", "Unpack", "Placeholder", "StridedSlice", "Less", 
-        "StopGradient", "Mean", "Exit", "ExpandDims", "Shape", "Merge",
+        "StopGradient", "Exit", "ExpandDims", "Shape", "Merge",
         "ApplyAdam", "AssignSub", "BiasAddGrad", "Conv2DBackpropFilter"
         ] # List of operations which cannot be output nodes
         # Tentative list based on graph analysis of models.
@@ -28,7 +28,7 @@ class TFParser:
     def __init__(self):
         pass
 
-    def parse_graph(self, file_path, model_name, category, 
+    def parse_graph(self, file_path, model_name, category, sub_category,
                         is_saved_model, input_operation_names):
         """Method to parse file and Create a corresponding Graph object
 
@@ -37,10 +37,15 @@ class TFParser:
         into a Graph, Node and Edge objects. Nodes are operations 
         and edges are tensors.
 
+        If graph contains a 'StatefulPartitionedCall' operation,
+        all operations are extracted and pushed into the database without tensor
+        information or graph structure.
+
         Args:
             file_path (str): path of the file to parse
             model_name (str): unique model name of the model being parsed.
             category (str): problem category of the model.
+            sub_category (str) : problem sub category of the model.
             is_saved_model (str, optional): "True" if file is in SavedModel format, 
                 defaults to "True".
             input_operation_names (list of str, optional) : Names of the operations 
@@ -79,15 +84,57 @@ class TFParser:
             # Loop to populate to_nodes and from_nodes
             for operation in graph.get_operations():
 
+                # If graph contains StatefulPartitionedCall operation,
+                # only extracting the operations and returning empty graph
                 if operation.node_def.op == "StatefulPartitionedCall":
-                    print("Graphs with operation 'StatefulPartitionedCall' are not supported for parsing")
-                    return None
+                    print(
+                        "Graphs with operation 'StatefulPartitionedCall' are " 
+                        "not fully supported for parsing, graph or tensor " 
+                        "information not supported, only operators will be "
+                        "loaded into database."
+                        )
+
+                    NODES_DISCARDED = [
+                        "Const", "VarHandleOp", "StatefulPartitionedCall", 
+                        "NoOp", "Identity"
+                        ] # List of operations to not be considered, not of semantic use.
+
+                    nodes.clear()
+
+                    # Looping over all ops in the graph
+                    for node_def in graph_def.node:
+                        op = node_def.op
+                        if op in NODES_DISCARDED or "VariableOp" in op:
+                            continue
+                        new_node = self._OP_TO_NODE.convert(None, node_def)
+                        nodes.append(new_node)
+
+                    # Looping over operations that occur within functions
+                    for func in graph_def.library.function:
+                        for node_def in func.node_def:
+                            op = node_def.op
+                            if op in NODES_DISCARDED or "VariableOp" in op:
+                                continue
+
+                            new_node = self._OP_TO_NODE.convert(None, node_def)
+                            nodes.append(new_node)
+
+                    # Discarding unwanted nodes
+                    for index, node in enumerate(nodes):
+                        if (node.operator_type in NODES_DISCARDED or 
+                            "VariableOp" in node.operator_type):
+                            nodes.pop(index)
+                            
+                    new_graph = Graph.Graph(nodes, [], [], {}, model_name, category, sub_category)
+                    new_graph.source = "TF"
+
+                    return new_graph
 
                 if operation.node_def.op == "Const":
                     continue
 
                 # Converting operation to nodes
-                new_node = self._OP_TO_NODE.convert(operation)
+                new_node = self._OP_TO_NODE.convert(operation, operation.node_def)
                 node_index = len(nodes)
                 nodes.append(new_node)
 
@@ -137,6 +184,10 @@ class TFParser:
                             adj_list.update({node1_index : list()})
 
                         adj_list[node1_index].append([edge_index, node2_index])
+
+            if len(start_node_indices) == 0:
+                print("Graph contains no input placeholders, cannot parse graph.")
+                return None
 
             # List of nodes contains nodes that are never visited by a traversal.
             # Assuming these are weights and biases,
@@ -220,6 +271,6 @@ class TFParser:
             del new_adj_list
 
             graph = Graph.Graph(nodes, start_node_indices, edges, adj_list,
-                                    model_name, category)
+                                    model_name, category, sub_category)
             graph.source = "TF"
             return graph
