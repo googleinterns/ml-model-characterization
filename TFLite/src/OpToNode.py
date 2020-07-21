@@ -10,7 +10,7 @@ class OpToNode:
 
     _OP_TFLITE_TO_TF = {
         "ADD" : "Add", "AddN" : "ADD_N", "DIV" : "Div", "SUB" : "Sub",
-        "AVERAGE_POOL_2D" : "AveragePool", "SpaceToBatchND" : "SPACE_TO_BATCH_ND",
+        "AVERAGE_POOL_2D" : "AvgPool", "SpaceToBatchND" : "SPACE_TO_BATCH_ND",
         "BATCH_TO_SPACE_ND" : "BatchToSpaceND", "CONCATENATION" : "Concat", 
         "CONV_2D" : "Conv2D", "DEPTHWISE_CONV_2D" : "DepthwiseConv2dNative",
         "DEQUANTIZE" : "Dequantize", "GATHER" : "Gather", 

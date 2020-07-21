@@ -56,9 +56,17 @@ def topk_similar_in_db(file_path, file_format, model_name, include_node_attrs,
         parser = TFParser.TFParser()
         graph = parser.parse_graph(file_path, model_name, None, None, "True", [])
 
-    else:
+    elif file_format == "TFLite":
         parser = TFLiteParser.TFLiteParser()
         graph = parser.parse_graph(file_path, model_name, None, None)
+
+    else:
+        print("File format provided is not supported,"
+                " must be one of TFLite, TFSavedFormat and TFFrozenGraph.")
+
+    if graph == None:
+        print("Failed to parse file.")
+        return
 
     # Adding current graph to database models to fit to graph2vec
     model_graphs.append(graph)
@@ -90,7 +98,8 @@ def topk_similar_in_db(file_path, file_format, model_name, include_node_attrs,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--file_path', required = True)
-    parser.add_argument('--file_format', required = True)
+    parser.add_argument('--file_format', required = True, 
+                        choices = ["TFLite", "TFSavedModel", "TFFrozenGraph"])
     parser.add_argument('--model_name', default = "input_file")
     parser.add_argument('--include_edge_attrs', default = "False")
     parser.add_argument('--include_node_attrs', default = "True")
