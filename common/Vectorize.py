@@ -6,35 +6,37 @@ import networkx
 import time
 
 class Vectorize:
-    """ Embedding class to create graph embeddings
+    """Embedding class to create graph embeddings.
 
     Creates embeddings from graph structures of models.
     """
 
     _EDGE_ATTRS = [
         "tensor_shape", "tensor_type"
-        ] # Input edge attributes to be used as features
+        ] # Input edge attributes to be used as features,
+        # must be attributes of common/Edge class
 
     _NODE_ATTRS = [
         "operator_type"
-        ] # Node attributes to be used as features
+        ] # Node attributes to be used as features,
+        # must be attributes of common/Node class
 
     def __init__(self):
         pass
 
     def _graph_to_networkx_graph(self, graph, include_edge_attrs, 
                                     include_node_attrs):
-        """ Internal function to convert Graph object to networkx graph
+        """Internal function to convert Graph object to networkx graph.
 
         Also adds a dummy node which is connected to all inputs
         if the graph is not connected.
 
         Arguments:
             graph (Graph object) : Graph object to be converted to networkx
-            include_edge_attrs (str) : case insensitive string to denote 
+            include_edge_attrs (str) : Case insensitive string to denote 
                 whether to include edge attributes of input edge from 
                 _EDGE_ATTRS in feature, if "true" then they are included.
-            include_node_attrs (str) : case insensitive string to denote 
+            include_node_attrs (str) : Case insensitive string to denote 
                 whether to include node attributes from _NODE_ATTRS in feature,
                 if "true" then they are included.
 
@@ -93,9 +95,9 @@ class Vectorize:
 
         return networkx_graph
 
-    def get_graph2vec_embeddings(self, model_graphs, include_edge_attrs = False, 
-                                    include_node_attrs = True, wl_iterations = 3):
-        """ Getting embeddings using graph2vec
+    def get_graph2vec_embeddings(self, model_graphs, include_edge_attrs, 
+                                    include_node_attrs, wl_iterations):
+        """Getting embeddings using Graph2Vec.
 
         Converts the model graphs into networkx graphs and uses graph2vec
         for getting embeddings for them.
@@ -117,7 +119,7 @@ class Vectorize:
             a list of embeddings for the same with index correspondence.
         """
 
-        """ Parameters to Graph2Vec
+        """Parameters to Graph2Vec.
 
         WL_ITERATIONS (int) : Depth of subgraph rooted at every node to be 
             considered for feature building in graph2vec.

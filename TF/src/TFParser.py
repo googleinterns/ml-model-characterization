@@ -1,4 +1,4 @@
-"""Module with TFParser class to parse TF files"""
+"""Module with TFParser class to parse TF files."""
 
 from queue import Queue
 import tensorflow as tf
@@ -10,7 +10,7 @@ import OpToNode
 import TensorToEdge
 
 class TFParser:
-    """Class to parse TF files
+    """Class to parse TF files.
 
     Contains parsing for SavedModel and FrozenGraph formats.
     """
@@ -23,7 +23,7 @@ class TFParser:
 
     def parse_graph(self, file_path, model_name, category, sub_category,
                         is_saved_model, input_operation_names):
-        """Method to parse file and Create a corresponding Graph object
+        """Method to parse file and Create a corresponding Graph object.
 
         Reads a GraphDef from SavedModel or FrozenGraph file and extracts 
         operations, tensors, graph structure and metadata and stores it 
@@ -35,10 +35,10 @@ class TFParser:
         information or graph structure.
 
         Args:
-            file_path (str): path of the file to parse
-            model_name (str): unique model name of the model being parsed.
-            category (str): problem category of the model.
-            sub_category (str) : problem sub category of the model.
+            file_path (str): Path of the file to parse
+            model_name (str): Unique model name of the model being parsed.
+            category (str): Problem category of the model.
+            sub_category (str) : Problem sub category of the model.
             is_saved_model (str, optional): "True" if file is in SavedModel format, 
                 defaults to "True".
             input_operation_names (list of str, optional) : Names of the operations 

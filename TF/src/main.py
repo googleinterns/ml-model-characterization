@@ -1,4 +1,4 @@
-""" main module to run inference or load data into database
+"""Main module to run inference or load data into database.
 
 Contains functions to load model data into database or run inference 
 and print it.
@@ -7,20 +7,19 @@ Attributes:
     MODELS_DIR (str) : Directory in which module will look for --filename
 
 CLA to module and common args to all functions in module:
-    filename (str): name of the file to be parsed. Must be present in 
+    filename (str): Name of the file to be parsed. Must be present in 
         models directory.
-    model_name (str): unique model name of the model being parsed.
-    category (str): problem category of the model.
-    sub_category (str) : problem sub category of the model.
+    model_name (str): Unique model name of the model being parsed.
+    category (str): Problem category of the model.
+    sub_category (str) : Problem sub category of the model.
     is_saved_model (str, optional): "True" if file is in SavedModel format, 
         defaults to "True".
     input_operation_names (list of str, optional) : Names of the operations 
         that are inputs to the model, defaults to [].
-    is_canonical (str) : String to separate unique architectures 
-            from duplicates, The first model to be inserted into database
-            with a specific architecture will have this to be "True", the other
-            models with same architecture will have this to be "False", 
-            defaults to "False". 
+    model_type (str) : String to denote type of model architecture, if a 
+                model is the first of its architecture, then value is set to
+                "canonical", if it is a module then set to "module", else 
+                "additional".
 
 """
 
@@ -32,8 +31,8 @@ import TFParser
 MODELS_DIR = "./TF/models/"
 
 def load_data(filename, model_name, category, sub_category, 
-                is_saved_model, input_operation_names, is_canonical):
-    """Function to parse TF file and load data into spanner database
+                is_saved_model, input_operation_names, model_type):
+    """Function to parse TF file and load data into spanner database.
 
     Parses a TF file (SavedModel or FrozenGraph format) into a Graph object 
     and stores the Graph into a spanner database.
@@ -52,11 +51,11 @@ def load_data(filename, model_name, category, sub_category,
     DATABASE_ID = 'models_db'
 
     storage = Storage.Storage(INSTANCE_ID, DATABASE_ID)
-    storage.load_data(graph, is_canonical)
+    storage.load_data(graph, model_type)
 
 def run_inference(filename, model_name, category, sub_category, 
                     is_saved_model, input_operation_names):
-    """Function to parse TF file and print graph information
+    """Function to parse TF file and print graph information.
 
     Parses a TF file (SavedModel or FrozenGraph format) and prints the 
     metadata, graph structure, nodes and edges
@@ -86,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument('--sub_category', default = "None") 
     parser.add_argument('--is_saved_model', default = "True")
     parser.add_argument('--input_operation_names', nargs="+", default = [])
-    parser.add_argument('--is_canonical', default = "False")
+    parser.add_argument('--model_type', default = "canonical")
     args = parser.parse_args()
 
     filename = args.filename
@@ -95,10 +94,10 @@ if __name__ == "__main__":
     sub_category = args.sub_category
     is_saved_model = args.is_saved_model
     input_operation_names = args.input_operation_names
-    is_canonical = args.is_canonical
+    model_type = args.model_type
 
     # load_data(filename, model_name, category, sub_category,
-    #            is_saved_model, input_operation_names, is_canonical)
+    #            is_saved_model, input_operation_names, model_type)
 
     run_inference(filename, model_name, category, sub_category,
                  is_saved_model, input_operation_names)

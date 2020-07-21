@@ -15,7 +15,7 @@ To switch between inference and data loading, uncomment the respective function 
 	- \-\-sub_category [sub_category] (optional) : Problem sub-category of the model, defaults to "None"
 	- \-\-is_saved_model [is_saved_model] (optional) : "True" to denote the .pb file is in SavedModel format and "False" for FrozenGraph format, defaults to "True".  
 	- \-\-input_operation_names [input_operation_names] (optional) : Names of the input operations to the model graph, defaults to [].
-	- \-\-is_canonical [is_canonical] (optional) : "True" if the model is canonical i.e. the first of its architecture, else "False", defaults to "False".
+	- \-\-model_type [model_type] (optional) : String to denote type of model architecture, if a model is the first of its architecture, then value is set to "canonical", if it is a module then set to "module", else "additional". Defaults to "canonical".
 
 
 ## TFLite Models (.tflite files)
@@ -30,17 +30,17 @@ To switch between inference and data loading, uncomment the respective function 
 	- \-\-model_name [model_name] : Name of the model, must be unique as it is the primary key in the database
 	- \-\-category [category] (optional) : Problem category of the model, defaults to "None"
 	- \-\-sub_category [sub_category] (optional) : Problem sub-category of the model, defaults to "None"
-	- \-\-is_canonical [is_canonical] (optional) : "True" if the model is canonical i.e. the first of its architecture, else "False", defaults to "False".
+	- \-\-model_type [model_type] (optional) : String to denote type of model architecture, if a model is the first of its architecture, then value is set to "canonical", if it is a module then set to "module", else "additional". Defaults to "canonical".
 
 ## Loading Data to DB from scratch
 Download the data folder from [Google drive](https://drive.google.com/drive/folders/1i6aUbCB0XTEsYXlyxMGpXEv6ydmukzQF?usp=sharing).<br>
-The file _load_data.py_ loads models from _models_ directory in _TF/_ and _TFLite/_ with a specific value for _is_canonical_ in the database, hence the data loading will be done in two phases.
+The file _load_data.py_ loads models from _models_ directory in _TF/_ and _TFLite/_ with a specific value for *model_type* in the database, hence the data loading will be done in two phases.
 ### Canonical Models
 - Copy the models in **canonical_[file_type].zip** to _[file_type]/models_ directory.
-- Set the _IS_CANONICAL_ constant in _load_data,py_ to "True" and run the command `python3 load_data.py`
+- Set the *MODEL_TYPE* constant in _load_data,py_ to "canonical" and run the command `python3 load_data.py`
 ### Non Canonical Models
 - Copy the models in **additional_[file_type].zip** to _[file_type]/models_ directory.
-- Set the _IS_CANONICAL_ constant in _load_data,py_ to "False" and run the command `python3 load_data.py`
+- Set the *MODEL_TYPE* constant in _load_data,py_ to "additional" and run the command `python3 load_data.py`
 
 ## Graph Embeddings
 To run graph2vec for graph embeddings and printing the _TOPK_ (defaults to 20) models most similar to every model or module, run the following commands. <br>

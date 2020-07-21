@@ -1,4 +1,4 @@
-"""Module with Storage class to store Graph object into a spanner database"""
+"""Module with Storage class to store Graph object into a spanner database."""
 
 from google.cloud import spanner
 from queue import Queue
@@ -9,7 +9,7 @@ import Graph
 import Node
 
 class Storage:
-    """ Storage class to store graph into spanner database
+    """Storage class to store graph into spanner database.
 
     Stores the Graph object attributes into the Models table, 
     Node object into Operators table and Edge object into the Tensors table.
@@ -35,19 +35,19 @@ class Storage:
         self.instance = self.spanner_client.instance(instance_id)
         self.database = self.instance.database(database_id)
 
-    def _load_model(self, graph, is_canonical):
-        """Internal method to store data into the Models table
+    def _load_model(self, graph, model_type):
+        """Internal method to store data into the Models table.
 
         Stores Graph instance attributes pertaining to model metadata into 
         Models table.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stores in 
+            graph (Graph object) : The instance of Graph to be stores in 
                 the Database.
-            is_canonical (str) : String to separate unique architectures 
-                from duplicates, The first model to be inserted into database
-                with a specific architecture will have this to be "True", the other
-                models with same architecture will have this to be "False". 
+            model_type (str) : String to denote type of model architecture, if a 
+                model is the first of its architecture, then value is set to
+                "canonical", if it is a module then set to "module", else 
+                "additional".
     
         Returns:
             A boolean, True if commit into database is succesful, False otherwise
@@ -58,8 +58,8 @@ class Storage:
 
         try:
             # To store the database column names and their values to be inserted
-            column_names = ['is_canonical']
-            values = [is_canonical]
+            column_names = ['model_type']
+            values = [model_type]
 
             attrs = vars(graph)
             for item in attrs.items():
@@ -83,7 +83,7 @@ class Storage:
             return False 
 
     def _load_operators(self, graph):
-        """Internal method to store data into the Operators table
+        """Internal method to store data into the Operators table.
 
         Stores attributes of Node instances of given graph, representing 
         operators, into Operators table. Inserts in batches due to mutation 
@@ -94,7 +94,7 @@ class Storage:
         ON DELETE CASCADE.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stored in the 
+            graph (Graph object) : The instance of Graph to be stored in the 
                 Database.
     
         Returns:
@@ -171,7 +171,7 @@ class Storage:
             return False
 
     def _load_tensors(self, graph):
-        """Internal method to store data into the Tensors table
+        """Internal method to store data into the Tensors table.
 
         Stores attributes of Edge instances of given graph, representing 
         tensors, into Tensors table. Inserts in batches due to mutation 
@@ -185,7 +185,7 @@ class Storage:
         due to ON DELETE CASCADE.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stored in the 
+            graph (Graph object) : The instance of Graph to be stored in the 
                 Database.
     
         Returns:
@@ -303,21 +303,21 @@ class Storage:
             )
             return False
 
-    def load_data(self, graph, is_canonical):
-        """Method to commit data into spanner database
+    def load_data(self, graph, model_type):
+        """Method to commit data into spanner database.
 
         Stores data for given graph into three tables using 3 helper internal
         methods. Prints a log if data load fails.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stored in the Database.
-            is_canonical (str) : String to separate unique architectures 
-                from duplicates, The first model to be inserted into database
-                with a specific architecture will have this to be "True", the other
-                models with same architecture will have this to be "False". 
+            graph (Graph object) : The instance of Graph to be stored in the Database.
+            model_type (str) : String to denote type of model architecture, if a 
+                model is the first of its architecture, then value is set to
+                "canonical", if it is a module then set to "module", else 
+                "additional".
         """ 
 
-        loaded = self._load_model(graph, is_canonical)
+        loaded = self._load_model(graph, model_type)
         if not loaded:
             print('Data Loading Failed in _load_model')
             return 
@@ -335,7 +335,7 @@ class Storage:
         print("Model", graph.model_name, "succesfuly loaded into database")
 
     def load_embeddings(self, model_graphs, embeddings):
-        """Function to load model graph embeddings to Embeddings table
+        """Function to load model graph embeddings to Embeddings table.
 
         Args:
             model_graphs (list of Graph objects) : The model graphs for which 
@@ -363,9 +363,9 @@ class Storage:
                 print("Model", model_graph.model_name, "embeddings not loaded.")
 
     def parse_models(self, parse_stateful = False):
-        """ Function to query and read data from database
+        """Method to query and read data from database.
 
-        Function to query database and read models into Graph objects.
+        Method to query database and read models into Graph objects.
 
         Args:
             parse_stateful (bool) : Boolean to indicate whether graphs with 
@@ -381,13 +381,14 @@ class Storage:
         
         # Query to get all models from Models table
         with self.database.snapshot() as snapshot:
-            results1 = snapshot.execute_sql(
+            qresult_models = snapshot.execute_sql(
                 "SELECT model_name, category, sub_category, source, num_inputs"
                 " FROM Models"
                 )
 
-        for row in results1:
+        for row in qresult_models:
 
+            # Checking num_inputs for presence of graph structure
             if row[4] == 0 and not parse_stateful:
                 continue
 
@@ -405,7 +406,7 @@ class Storage:
 
             # Querying Operators of model_name
             with self.database.snapshot() as snapshot:
-                results2 = snapshot.execute_sql(
+                qresult_operators = snapshot.execute_sql(
                     "SELECT * from Models JOIN Operators"
                     " ON Models.model_name = Operators.model_name"
                     " WHERE Models.model_name = '" + model_name + "'"
@@ -419,10 +420,10 @@ class Storage:
             populate_dicts = True
 
             # Extracting Node attributes
-            for row in results2:
+            for row in qresult_operators:
                 if populate_dicts:
-                    for index in range(len(results2.metadata.row_type.fields)):
-                        field_name = results2.metadata.row_type.fields[index].name
+                    for index in range(len(qresult_operators.metadata.row_type.fields)):
+                        field_name = qresult_operators.metadata.row_type.fields[index].name
                         field_to_index[field_name] = index
                     
                     populate_dicts = False
@@ -441,7 +442,7 @@ class Storage:
             
             # Querying Tensors of model_name
             with self.database.snapshot() as snapshot:
-                results2 = snapshot.execute_sql(
+                qresult_tensors = snapshot.execute_sql(
                     "SELECT * from Models JOIN Tensors"
                     " ON Models.model_name = Tensors.model_name"
                     " WHERE Models.model_name = '" + model_name + "'"
@@ -455,10 +456,10 @@ class Storage:
             populate_dicts = True
 
             # Extracting Edge attributes
-            for row in results2:
+            for row in qresult_tensors:
                 if populate_dicts:
-                    for index in range(len(results2.metadata.row_type.fields)):
-                        field_name = results2.metadata.row_type.fields[index].name
+                    for index in range(len(qresult_tensors.metadata.row_type.fields)):
+                        field_name = qresult_tensors.metadata.row_type.fields[index].name
                         field_to_index[field_name] = index
                     
                     populate_dicts = False

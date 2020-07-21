@@ -1,4 +1,4 @@
-""" main module to run inference or load data into database
+"""Main module to run inference or load data into database.
 
 Contains functions to load model data into database or run inference 
 and print it.
@@ -7,16 +7,15 @@ Attributes:
     MODELS_DIR (str) : Directory in which module will look for --filename
 
 CLA to module and common args to all functions in module:
-    filename (str) : name of the file to be parsed. Must be present in 
+    filename (str) : Name of the file to be parsed. Must be present in 
         models directory.
-    model_name (str) : unique model name of the model being parsed.
-    category (str) : problem category of the model.
-    sub_category (str) : problem sub category of the model.
-    is_canonical (str) : String to separate unique architectures 
-            from duplicates, The first model to be inserted into database
-            with a specific architecture will have this to be "True", the other
-            models with same architecture will have this to be "False", 
-            defaults to "False". 
+    model_name (str) : Unique model name of the model being parsed.
+    category (str) : Problem category of the model.
+    sub_category (str) : Problem sub category of the model.
+    model_type (str) :String to denote type of model architecture, if a 
+                model is the first of its architecture, then value is set to
+                "canonical", if it is a module then set to "module", else 
+                "additional".
 """
 
 import argparse
@@ -27,8 +26,8 @@ import TFLiteParser
 
 MODELS_DIR = "./TFLite/models/"
 
-def load_data(filename, model_name, category, sub_category, is_canonical):
-    """Function to parse TFLite file and load data into spanner database
+def load_data(filename, model_name, category, sub_category, model_type):
+    """Function to parse TFLite file and load data into spanner database.
 
     Parses a TFLite file into a Graph object and stores the Graph into a 
     spanner database.
@@ -43,10 +42,10 @@ def load_data(filename, model_name, category, sub_category, is_canonical):
     DATABASE_ID = 'models_db'
 
     storage = Storage.Storage(INSTANCE_ID, DATABASE_ID)
-    storage.load_data(graph, is_canonical)
+    storage.load_data(graph, model_type)
 
 def run_inference(filename, model_name, category, sub_category):
-    """Function to parse TFLite file and print graph information
+    """Function to parse TFLite file and print graph information.
 
     Parses a TFLite file and prints the metadata, graph structure, nodes and edges
     """
@@ -65,19 +64,19 @@ def run_inference(filename, model_name, category, sub_category):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--filename')
-    parser.add_argument('--model_name')
+    parser.add_argument('--filename', required = True)
+    parser.add_argument('--model_name', required = True)
     parser.add_argument('--category', default = "None") 
     parser.add_argument('--sub_category', default = "None")
-    parser.add_argument('--is_canonical', default = "False")
+    parser.add_argument('--model_type', default = "canonical")
     args = parser.parse_args()
 
     filename = args.filename
     model_name = args.model_name
     category = args.category
     sub_category = args.sub_category
-    is_canonical = args.is_canonical
+    model_type = args.model_type
 
-    # load_data(filename, model_name, category, sub_category, is_canonical)
+    # load_data(filename, model_name, category, sub_category, model_type)
 
     run_inference(filename, model_name, category, sub_category)

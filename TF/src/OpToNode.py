@@ -1,4 +1,4 @@
-"""Module with OpToNode class to create Node objects for operations"""
+"""Module with OpToNode class to create Node objects for operations."""
 
 import tensorflow as tf
 
@@ -12,7 +12,7 @@ class OpToNode:
     
     # Internal helper function to extract attributes from different op types.
     def _attr_from_node_def(self, operation, node_def, node):
-        """Internal function to add attribute values to node
+        """Internal function to add attribute values to node.
 
         Adds relevant attribute values to node depending on the operation.
         For semantic information on Node attributes for TF,
@@ -114,7 +114,7 @@ class OpToNode:
         return node
 
     def convert(self, operation, node_def):
-        """Function to create Node object representing given operation
+        """Function to create Node object representing given operation.
 
         Creates a new Node object to represent the given operation.
 

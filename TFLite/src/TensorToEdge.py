@@ -1,4 +1,4 @@
-"""Module with TensorToEdge class to create Edge objects for tensors"""
+"""Module with TensorToEdge class to create Edge objects for tensors."""
 
 import inspect
 
@@ -6,7 +6,7 @@ from common import Edge
 from tflite import TensorType
 
 class TensorToEdge:
-    """Class to convert tensor to Edge object"""
+    """Class to convert tensor to Edge object."""
     
     def __init__(self):
         typeclass = TensorType.TensorType
@@ -17,7 +17,7 @@ class TensorToEdge:
                     self._tensor_type[member[1]] = member[0]
 
     def convert(self, tensor):
-        """Function to create an Edge object representing given Tensor
+        """Function to create an Edge object representing given Tensor.
 
         Creates a new Edge object to represent the given tensor and populates
         its attributes.

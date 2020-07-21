@@ -1,7 +1,7 @@
-"""Module with Node class to store Operator attributes"""
+"""Module with Node class to store Operator attributes."""
 
 class Node:
-    """ Node class to represent operators 
+    """ Node class to represent operators. 
 
     Stores tensors and their extracted attributes.
 
@@ -85,7 +85,7 @@ class Node:
         self.direction = None
 
     def serialize(self):
-        """ Helper method to serialize instance
+        """ Helper method to serialize instance.
 
         Serializes attributes of the instance to a string, except 'value'
         and 'label' attributes.

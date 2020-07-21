@@ -1,16 +1,16 @@
-""" module to to display cosine similarity
+"""Module to to display cosine similarity.
 
 Module to display cosine similarity in models in database.
-Also contains function to load graph embeddings into Models table
+Also contains function to load graph embeddings into Models table.
 
 CLA to module:
-    include_edge_attrs (str) : case insensitive string to denote whether to 
+    include_edge_attrs (str) : Case insensitive string to denote whether to 
         include edge attributes of input edge from _EDGE_ATTRS in feature,
         if "true" then they are included.
-    include_node_attrs (str) : case insensitive string to denote whether to 
+    include_node_attrs (str) : Case insensitive string to denote whether to 
         include node attributes from _NODE_ATTRS in feature, if "true" then 
         they are included.
-    wl_iterations (int) : depth of subgraph rooted at every node to be 
+    wl_iterations (int) : Depth of subgraph rooted at every node to be 
         considered for feature building in graph2vec.
 """
 
@@ -23,7 +23,7 @@ import Storage
 import Vectorize
 
 def topk_similarity(model_graphs, embeddings, topk):
-    """ Function to print topk similar models to each model
+    """Function to print topk similar models to each model.
 
     Args:
         model_graphs (list of Graph objects) : List of Graph objects 
@@ -47,7 +47,7 @@ def topk_similarity(model_graphs, embeddings, topk):
                     model_graphs[indices[rank]].model_name)
 
 def db_module_similarity(model_graphs, embeddings, topk):
-    """ Module to print topk similar models to each module in database
+    """Module to print topk similar models to each module in database.
 
     Args:
         model_graphs (list of Graph objects) : List of Graph objects 
@@ -71,7 +71,7 @@ def db_module_similarity(model_graphs, embeddings, topk):
                         model_graphs[indices[rank]].model_name)
 
 def store_embeddings(model_graphs, embeddings, instance_id, database_id):
-    """ Function to store embeddings into Models table.
+    """Function to store embeddings into Models table.
 
     Args:
         models_graphs (list of Graph objects) : List of Graph objects 
@@ -114,4 +114,4 @@ if __name__ == "__main__":
 
     topk_similarity(model_graphs, embeddings, TOPK)
     db_module_similarity(model_graphs, embeddings, TOPK)
-    store_embeddings(model_graphs, embeddings, INSTANCE_ID, DATABASE_ID)
+    # store_embeddings(model_graphs, embeddings, INSTANCE_ID, DATABASE_ID)
