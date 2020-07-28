@@ -1,4 +1,4 @@
-"""Module with TFLiteParser class to parse tflite files"""
+"""Module with TFLiteParser class to parse tflite files."""
 
 import flatbuffers
 import inspect
@@ -12,7 +12,7 @@ import OpToNode
 import TensorToEdge
 
 class TFLiteParser:
-    """Class to parse TF files
+    """Class to parse TF files.
 
     Contains parsing for SavedModel and FrozenGraph formats.
     """
@@ -31,13 +31,13 @@ class TFLiteParser:
 
     # Reading tflite file onto Model object
     def parse(self, file_path):
-        """Method to parse tflite file into a tflite Model object
+        """Method to parse tflite file into a tflite Model object.
 
         Args:
-            file_path (str) : path to the file to be parsed.
+            file_path (str) : Path to the file to be parsed.
 
         Returns:
-            tflite Model object containing the tflite model information.
+            Tflite model object containing the tflite model information.
         """
         
         with open(file_path, "rb") as file:
@@ -46,7 +46,7 @@ class TFLiteParser:
         return model
 
     def parse_graph(self, file_path, model_name, category, sub_category):
-        """Method to parse file and Create a corresponding Graph object
+        """Method to parse file and Create a corresponding Graph object.
 
         Reads a tflite file into a tflite/Model Object and then extracts 
         operators, tensors, graph structure and metadata and stores it 
@@ -54,10 +54,10 @@ class TFLiteParser:
         edges are tensors.
 
         Args:
-            file_path (str): path of the file to parse
-            model_name (str): unique model name of the model being parsed.
-            category (str): problem category of the model.
-            sub_category (str) : problem sub category of the model.
+            file_path (str): Path of the file to parse
+            model_name (str): Unique model name of the model being parsed.
+            category (str): Problem category of the model.
+            sub_category (str) : Problem sub category of the model.
 
         Returns:
             The Graph object created for the file.
@@ -160,5 +160,9 @@ class TFLiteParser:
             
         graph = Graph.Graph(nodes, start_node_indices, edges, adj_list, 
                             model_name, category, sub_category)
+
+        # Removing nodes which are not reachable from input
+        graph.process_nodes()
         graph.source = "TFLite"
+        
         return graph             

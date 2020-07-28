@@ -1,12 +1,12 @@
-"""Module with Edge class to store Tensor attributes"""
+"""Module with Edge class to store Tensor attributes."""
 
 class Edge:
-    """ Edge class to represent tensors 
+    """Edge class to represent tensors.
     
     Stores tensors and their extracted attributes.
 
     Attributes:
-        label (str): label for the instance, intended for programmer's use.
+        label (str): Label for the instance, intended for programmer's use.
         value (tensor): The complete tensor object in data type as 
             extracted from the file format.
         tensor_label (str): The name if the tensor as extracted from the file format.
@@ -23,7 +23,7 @@ class Edge:
         self.tensor_type = None
 
     def serialize(self):
-        """ Helper method to serialize instance
+        """Helper method to serialize instance.
 
         Serializes attributes of the instance to a string, except 'value' and
         'label' attributes.
