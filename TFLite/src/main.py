@@ -22,7 +22,7 @@ import argparse
 import os
 
 from common import Storage
-import TFLiteParser
+from TFLite.src import TFLiteParser
 
 MODELS_DIR = "./TFLite/models/"
 

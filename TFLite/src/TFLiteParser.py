@@ -6,10 +6,10 @@ import inspect
 from common import Edge
 from common import Graph
 from common import Node
-from tflite import BuiltinOperator
-from tflite import Model
-import OpToNode
-import TensorToEdge
+from TFLite.src import OpToNode
+from TFLite.src import TensorToEdge
+from TFLite.src.tflite import BuiltinOperator
+from TFLite.src.tflite import Model
 
 class TFLiteParser:
     """Class to parse TF files.
