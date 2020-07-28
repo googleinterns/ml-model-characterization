@@ -7,8 +7,8 @@ CREATE TABLE Models (
   max_fan_out INT64,
   source STRING(1024),
   sub_category STRING(1024),
-  type STRING(1024),
   embeddings ARRAY<FLOAT64>,
+  model_type STRING(1024),
 ) PRIMARY KEY(model_name);
 
 CREATE TABLE Operators (
