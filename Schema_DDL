@@ -7,7 +7,8 @@ CREATE TABLE Models (
   max_fan_out INT64,
   source STRING(1024),
   sub_category STRING(1024),
-  is_canonical STRING(1024),
+  type STRING(1024),
+  embeddings ARRAY<FLOAT64>,
 ) PRIMARY KEY(model_name);
 
 CREATE TABLE Operators (
@@ -44,6 +45,7 @@ CREATE TABLE Operators (
   input_mode STRING(1024),
   direction STRING(1024),
   data_format STRING(1024),
+  is_input BOOL,
 ) PRIMARY KEY(model_name, operator_id),
   INTERLEAVE IN PARENT Models ON DELETE CASCADE;
 

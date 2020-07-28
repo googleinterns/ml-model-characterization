@@ -1,4 +1,4 @@
-"""Module with OpToNode class to create Node objects for operators"""
+"""Module with OpToNode class to create Node objects for operators."""
 
 import inspect
 
@@ -6,7 +6,7 @@ from common import Node
 from tflite import *
 
 class OpToNode:
-    """Class to convert operation to Node object"""
+    """Class to convert operation to Node object."""
 
     _OP_TFLITE_TO_TF = {
         "ADD" : "Add", "AddN" : "ADD_N", "DIV" : "Div", "SUB" : "Sub",
@@ -94,9 +94,9 @@ class OpToNode:
     # Function to fill dictionary with inverse 
     # enum mappings of class 'class_type'
     def _fill_dict(self, class_type, val_to_name):
-        """ Internal method to fill dictionary
+        """Internal method to fill dictionary.
 
-        Fills dictionary with inverse enum mappings from value to name
+        Fills dictionary with inverse enum mappings from value to name.
         
         Args:
             class_type (tflite/* Object) : The class for which inverse enum 
@@ -736,7 +736,7 @@ class OpToNode:
         return node
   
     def convert(self, operator, opname):
-        """Function to create Node object representing given operator
+        """Function to create Node object representing given operator.
 
         Creates a new Node object to represent the given operator.
 
@@ -746,7 +746,7 @@ class OpToNode:
             opname (str) : Name of the operator.
 
         Returns:
-            The created Node object instance representing the operator
+            The created Node object instance representing the operator.
         """
 
         node = Node.Node(label = opname, operator_type = opname, 

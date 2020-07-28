@@ -1,9 +1,9 @@
-"""Module to initialise and generate code for parsing tflite files
+"""Module to initialise and generate code for parsing tflite files.
 
 Attributes:
     SCHEMA_PATH (str) : Path to schema.fbs downloaded from
-        https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/schema/schema.fbs
-    OUT_PATH (str) : Path to store generated code files
+        https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/schema/schema.fbs.
+    OUT_PATH (str) : Path to store generated code files.
 """
 
 import os
@@ -12,7 +12,7 @@ SCHEMA_PATH = "./TFLite/schema.fbs"
 OUT_PATH = "./TFLite/src/"
 
 def init_tflite_files():
-    """Function to generate code files from flatbuffer schema
+    """Function to generate code files from flatbuffer schema.
 
     Compiles flatbuffer schema using flatc compiler and generates code files
     for reading the .tflite file.

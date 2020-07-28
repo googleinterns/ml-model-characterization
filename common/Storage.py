@@ -1,11 +1,15 @@
-"""Module with Storage class to store Graph object into a spanner database"""
+"""Module with Storage class to store Graph object into a spanner database."""
 
 from google.cloud import spanner
 from queue import Queue
 import os
 
+import Edge
+import Graph
+import Node
+
 class Storage:
-    """ Storage class to store graph into spanner database
+    """Storage class to store graph into spanner database.
 
     Stores the Graph object attributes into the Models table, 
     Node object into Operators table and Edge object into the Tensors table.
@@ -31,19 +35,19 @@ class Storage:
         self.instance = self.spanner_client.instance(instance_id)
         self.database = self.instance.database(database_id)
 
-    def _load_model(self, graph, is_canonical):
-        """Internal method to store data into the Models table
+    def _load_model(self, graph, model_type):
+        """Internal method to store data into the Models table.
 
         Stores Graph instance attributes pertaining to model metadata into 
         Models table.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stores in 
+            graph (Graph object) : The instance of Graph to be stores in 
                 the Database.
-            is_canonical (str) : String to separate unique architectures 
-                from duplicates, The first model to be inserted into database
-                with a specific architecture will have this to be "True", the other
-                models with same architecture will have this to be "False". 
+            model_type (str) : String to denote type of model architecture, if a 
+                model is the first of its architecture, then value is set to
+                "canonical", if it is a module then set to "module", else 
+                "additional".
     
         Returns:
             A boolean, True if commit into database is succesful, False otherwise
@@ -54,8 +58,8 @@ class Storage:
 
         try:
             # To store the database column names and their values to be inserted
-            column_names = ['is_canonical']
-            values = [is_canonical]
+            column_names = ['model_type']
+            values = [model_type]
 
             attrs = vars(graph)
             for item in attrs.items():
@@ -79,7 +83,7 @@ class Storage:
             return False 
 
     def _load_operators(self, graph):
-        """Internal method to store data into the Operators table
+        """Internal method to store data into the Operators table.
 
         Stores attributes of Node instances of given graph, representing 
         operators, into Operators table. Inserts in batches due to mutation 
@@ -90,7 +94,7 @@ class Storage:
         ON DELETE CASCADE.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stored in the 
+            graph (Graph object) : The instance of Graph to be stored in the 
                 Database.
     
         Returns:
@@ -111,9 +115,9 @@ class Storage:
 
             # Number of mutations per row is the number of attributes being 
             # pushed to database
-            # 2 additional attributes, 'model_name' and 'operator_id',
-            # present in db other than the class attributes
-            num_attributes = len(vars(graph.nodes[0])) + 2
+            # 3 additional attributes, 'model_name' and 'operator_id', 
+            # 'is_input' present in db other than the class attributes
+            num_attributes = len(vars(graph.nodes[0])) + 3
 
             # Number of nodes to be processed per batch i.e.
             # floor(max mutations per batch / number of mutations per row)
@@ -128,12 +132,17 @@ class Storage:
                         if operator_id == num_nodes:
                             break
 
+                        # Boolean to denote if operator is input
+                        is_input = False
+                        if operator_id in graph.start_node_indices:
+                            is_input = True
+
                         node = graph.nodes[operator_id]
 
                         # To store the database column names and their values 
                         # to be inserted
-                        column_names = ['model_name', 'operator_id']
-                        values = [graph.model_name, operator_id + 1]
+                        column_names = ['model_name', 'operator_id', 'is_input']
+                        values = [graph.model_name, operator_id + 1, is_input]
 
                         attrs = vars(node)
                         for item in attrs.items():
@@ -162,7 +171,7 @@ class Storage:
             return False
 
     def _load_tensors(self, graph):
-        """Internal method to store data into the Tensors table
+        """Internal method to store data into the Tensors table.
 
         Stores attributes of Edge instances of given graph, representing 
         tensors, into Tensors table. Inserts in batches due to mutation 
@@ -176,7 +185,7 @@ class Storage:
         due to ON DELETE CASCADE.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stored in the 
+            graph (Graph object) : The instance of Graph to be stored in the 
                 Database.
     
         Returns:
@@ -294,21 +303,21 @@ class Storage:
             )
             return False
 
-    def load_data(self, graph, is_canonical):
-        """Method to commit data into spanner database
+    def load_data(self, graph, model_type):
+        """Method to commit data into spanner database.
 
         Stores data for given graph into three tables using 3 helper internal
         methods. Prints a log if data load fails.
 
         Args:
-            graph (Graph object) : The intance of Graph to be stored in the Database.
-            is_canonical (str) : String to separate unique architectures 
-                from duplicates, The first model to be inserted into database
-                with a specific architecture will have this to be "True", the other
-                models with same architecture will have this to be "False". 
+            graph (Graph object) : The instance of Graph to be stored in the Database.
+            model_type (str) : String to denote type of model architecture, if a 
+                model is the first of its architecture, then value is set to
+                "canonical", if it is a module then set to "module", else 
+                "additional".
         """ 
 
-        loaded = self._load_model(graph, is_canonical)
+        loaded = self._load_model(graph, model_type)
         if not loaded:
             print('Data Loading Failed in _load_model')
             return 
@@ -324,3 +333,165 @@ class Storage:
             return 
 
         print("Model", graph.model_name, "succesfuly loaded into database")
+
+    def load_embeddings(self, model_graphs, embeddings):
+        """Function to load model graph embeddings to Embeddings table.
+
+        Args:
+            model_graphs (list of Graph objects) : The model graphs for which 
+                the embeddings are to be loaded.
+            embeddings (list of vectors) : The embeddings for model graphs with 
+                index correspondence.
+        """
+
+        if len(embeddings) == 0:
+            return
+        
+        for index, model_graph in enumerate(model_graphs):
+            try:
+                query = (
+                    "UPDATE Models SET embeddings = " 
+                    + str(list(embeddings[index])) + " WHERE model_name = '" 
+                    + model_graph.model_name + "'"
+                    )
+                updated_rows = self.database.execute_partitioned_dml(
+                    query
+                )
+
+            except Exception as e:
+                print(e)
+                print("Model", model_graph.model_name, "embeddings not loaded.")
+
+    def parse_models(self, parse_stateful = False):
+        """Method to query and read data from database.
+
+        Method to query database and read models into Graph objects.
+
+        Args:
+            parse_stateful (bool) : Boolean to indicate whether graphs with 
+                stateful partitioned call should be parsed, these graphs do not
+                contain a graph structure or tensors. Defaults to False.
+
+        Returns:
+            List of Graph objects corresponding to the graph objects the models
+            in the spanner database have been parsed into.
+        """
+
+        model_graphs = list()
+        
+        # Query to get all models from Models table
+        with self.database.snapshot() as snapshot:
+            qresult_models = snapshot.execute_sql(
+                "SELECT model_name, category, sub_category, source, num_inputs"
+                " FROM Models"
+                )
+
+        for row in qresult_models:
+
+            # Checking num_inputs for presence of graph structure
+            if row[4] == 0 and not parse_stateful:
+                continue
+
+            # Extracting model attributes
+            model_name = row[0]
+            category = row[1]
+            sub_category = row[2]
+            source = row[3]
+
+            nodes = list()
+            edges = list()
+            start_node_indices = list()
+
+            adj_list = dict()
+
+            # Querying Operators of model_name
+            with self.database.snapshot() as snapshot:
+                qresult_operators = snapshot.execute_sql(
+                    "SELECT * from Models JOIN Operators"
+                    " ON Models.model_name = Operators.model_name"
+                    " WHERE Models.model_name = '" + model_name + "'"
+                    " ORDER BY operator_id"
+                )
+            
+            # Dictionary to hold which field is in which index of query results
+            field_to_index = dict()
+
+            # Boolean to check if field_to_dict needs to be populated
+            populate_dicts = True
+
+            # Extracting Node attributes
+            for row in qresult_operators:
+                if populate_dicts:
+                    for index in range(len(qresult_operators.metadata.row_type.fields)):
+                        field_name = qresult_operators.metadata.row_type.fields[index].name
+                        field_to_index[field_name] = index
+                    
+                    populate_dicts = False
+
+                new_node = Node.Node(None, None)
+
+                for attr in vars(new_node).keys():
+                    if attr in field_to_index:
+                        setattr(new_node, attr, row[field_to_index[attr]])
+
+                nodes.append(new_node)
+
+                # populating start_node_indices using is_input field
+                if row[field_to_index['is_input']]:
+                    start_node_indices.append(len(nodes) - 1)
+            
+            # Querying Tensors of model_name
+            with self.database.snapshot() as snapshot:
+                qresult_tensors = snapshot.execute_sql(
+                    "SELECT * from Models JOIN Tensors"
+                    " ON Models.model_name = Tensors.model_name"
+                    " WHERE Models.model_name = '" + model_name + "'"
+                    " ORDER BY tensor_id"
+                )
+
+            # Dictionary to hold which field is in which index of query results
+            field_to_index.clear()
+
+            # Boolean to check if field_to_dict needs to be populated
+            populate_dicts = True
+
+            # Extracting Edge attributes
+            for row in qresult_tensors:
+                if populate_dicts:
+                    for index in range(len(qresult_tensors.metadata.row_type.fields)):
+                        field_name = qresult_tensors.metadata.row_type.fields[index].name
+                        field_to_index[field_name] = index
+                    
+                    populate_dicts = False
+
+                new_edge = Edge.Edge(None, None)
+
+                for attr in vars(new_edge).keys():
+                    if attr in field_to_index:
+                        setattr(new_edge, attr, row[field_to_index[attr]])
+
+                edges.append(new_edge)
+
+                to_operator_ids = row[field_to_index['to_operator_ids']]
+                from_operator_ids = row[field_to_index['from_operator_ids']]
+
+                edge_index = len(edges) - 1
+
+                for src_node_index in from_operator_ids:
+                    src_node_index -= 1
+                    for dest_node_index in to_operator_ids:
+                        dest_node_index -= 1
+
+                        if src_node_index not in adj_list:
+                            adj_list.update({src_node_index : []})
+                        
+                        adj_list[src_node_index].append([edge_index, 
+                                                            dest_node_index])
+
+            new_graph = Graph.Graph(nodes, start_node_indices, edges, adj_list, 
+                                    model_name, category, sub_category)
+            new_graph.source = source
+
+            model_graphs.append(new_graph)
+
+        return model_graphs
