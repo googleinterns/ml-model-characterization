@@ -44,10 +44,11 @@ The file _load_data.py_ loads models from _models_ directory in _TF/_ and _TFLit
 
 ## Graph Embeddings
 
-### Printing similarity within database
+### Printing similarity within database and loading embeddings to database
 To run graph2vec for graph embeddings and printing the _TOPK_ (defaults to 20) models most similar to every model or module, run the following commands. <br>
 To change the number of models being printed, change _TOPK_ value in _common/similarity.py_. <br>
 To switch between printing for model and modules, uncomment the respective function in _common/similarity.py_. <br>
+To load embeddings to the database, uncomment the call to *store_embeddings()* function in _common/similarity.py_. <br>
 
 - `bazel build similarity`
 - `bazel-bin/similarity`, this takes the following CLAs,

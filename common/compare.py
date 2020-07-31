@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument('--model_name', default = "input_file")
     parser.add_argument('--include_edge_attrs', default = "False")
     parser.add_argument('--include_node_attrs', default = "True")
-    parser.add_argument('--wl_iterations', default = 3)
+    parser.add_argument('--wl_iterations', type = int, default = 3)
     args = parser.parse_args()
 
     file_path = args.file_path
