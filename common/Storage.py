@@ -362,6 +362,8 @@ class Storage:
                 print(e)
                 print("Model", model_graph.model_name, "embeddings not loaded.")
 
+        print("Finished loading embeddings to database.")
+
     def parse_models(self, parse_stateful = False):
         """Method to query and read data from database.
 
